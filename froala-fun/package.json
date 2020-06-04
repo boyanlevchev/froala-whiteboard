@@ -1,5 +1,6 @@
 {
   "name": "froala-fun",
+  "homepage": "https://froala-whiteboard.herokuapp.com/froala-fun",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

@@ -21,9 +21,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 // const path = require('path')// Serve static files from the React frontend app
-app.use(express.static(path.join(__dirname, 'froala-fun/build')))// Anything that doesn't match the above, send back index.html
+app.use(express.static(path.join(__dirname, 'froala-fun','build')))// Anything that doesn't match the above, send back index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname + '/froala-fun/build/index.html'))
+  res.sendFile(path.join(__dirname, 'froala-fun','build','index.html'))
 })
 
 app.use('/', indexRouter);

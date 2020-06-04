@@ -31,9 +31,9 @@ app.get('*', function(req, res) {
 });
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/get_signature', signatureRouter);
-app.use('/get_frofro', frofroRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/get_signature', signatureRouter);
+app.use('/api/get_frofro', frofroRouter);
 
 
 

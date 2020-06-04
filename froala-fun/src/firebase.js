@@ -1,7 +1,9 @@
 import * as firebase from 'firebase';
-require('dotenv').config();
+// require('dotenv').config();
+
 
 // Your web app's Firebase configuration
+
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FB_Key,
   authDomain: process.env.REACT_APP_FB_authDomain,
@@ -12,8 +14,12 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FB_appId,
   measurementId: process.env.REACT_APP_FB_measurementId
 };
-// Initialize Firebase
+
 firebase.initializeApp(firebaseConfig);
-// firebase.analytics()
+
+
+// Initialize Firebase
 export const database = firebase.database();
+// firebase.analytics()
+
 // export const editorRef = databaseRef.child("editor")

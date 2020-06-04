@@ -32,10 +32,10 @@ class Canvas extends Component {
   }
 
   componentDidMount() {
-    fetch('/get_signature').then(res => res.json()).then( res => {
+    fetch('/api/get_signature').then(res => res.json()).then( res => {
       this.setState({secondClick:res})
     })
-    fetch('get_frofro').then(res => res.text()).then( res => {
+    fetch('/api/get_frofro').then(res => res.text()).then( res => {
       this.setState({styling: res})
     })
     // console.log(fetch( '/get_signature').then(res => res.json()))

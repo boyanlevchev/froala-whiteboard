@@ -44,5 +44,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://powerful-ravine-27970.herokuapp.com/"
+  "proxy": "http://localhost:3001"
 }

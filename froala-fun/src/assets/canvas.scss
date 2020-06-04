@@ -1,0 +1,62 @@
+
+#canvas {
+  min-height: 700px;
+  min-width: 1500px;
+  position: relative;
+  shadow: none;
+  outline: none;
+  & :focus{
+    shadow: none;
+    outline: none;
+  }
+}
+
+#canvas-header > h1 {
+  position: absolute;
+  text-align: left;
+  padding-left: 40px;
+  height: 60px;
+  font-weight: 200;
+  font-size: 28px;
+}
+
+#canvas-placeholder {
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  z-index: -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.canvas-placeholder-hidden {
+  display:none;
+}
+
+.canvas-placeholder-visible {
+  display:block;
+}
+
+.sketchField {
+  position: absolute;
+  top:0;
+  left: 0;
+  height:100vh;
+  width: 100vw;
+  z-index:1000;
+}
+.sketchFieldInactive {
+  pointer-events: none;
+}
+
+#controls{
+  padding-left: 40px;
+  line-height: 60%;
+  text-align: left;
+  position: absolute;
+  bottom: 0;
+  left:0;
+  font-weight: 100;
+  pointer-events: none;
+}

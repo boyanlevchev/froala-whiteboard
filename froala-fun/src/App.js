@@ -11,7 +11,6 @@ import './App.css';
 
 import Canvas from './containers/canvas'
 
-
 function App() {
   // let location = useLocation();
   return (

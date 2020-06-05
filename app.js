@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+// var request = require('request')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -21,20 +22,38 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 // const path = require('path')// Serve static files from the React frontend app
+
 app.use(express.static(path.join(__dirname, './froala-fun/build')))// Anything that doesn't match the above, send back index.html
-app.get('/', function(req, res) {
-  res.sendFile('index.html', { root: __dirname }, function(err) {
-    if (err) {
-      res.status(500).send(err);
-    }
-  });
-});
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'froala-fun','build','index.html'))
+// })
 
 app.use('/', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/get_signature', signatureRouter);
 app.use('/api/get_frofro', frofroRouter);
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'froala-fun','build','index.html'))
+})
+
+// app.route('*').get(function(req, res, next) {
+
+//   req.get('/', function(err, response, body) {
+//     if (!err) {
+//       // req.send(body);
+//       res.sendFile(path.join(__dirname, 'froala-fun','build','index.html'))
+//     }
+//   });
+// });
+
+// app.get('*', function(req, res) {
+//     res.redirect('/');
+// });
+
+// function redirectUnmatched(req, res) {
+//   res.redirect("/");
+// }
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

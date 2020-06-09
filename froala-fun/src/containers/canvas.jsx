@@ -20,7 +20,7 @@ class Canvas extends Component {
     this.state = {
       firstClick: 0,
       editorComponents: {},
-      editorIDs: [],
+      editorIDs: 0,
       drawable: false,
       currentSketchField: "",
       lastRef: [],
@@ -32,6 +32,8 @@ class Canvas extends Component {
   }
 
   componentDidMount() {
+    // <script src="https://app.codox.io/plugins/wave.client.js?apiKey=0a9ee7fb-9c0a-4a05-9362-f5f36dbc4b58&app=froala" type="text/javascript"></script>
+
     fetch('/api/get_signature').then(res => res.json()).then( res => {
       this.setState({secondClick:res})
     })
@@ -44,40 +46,77 @@ class Canvas extends Component {
   }
 
   componentDidUpdate(prevProps) {
+    // console.log("updated!")
+    // console.log(this.props)
+    //updaet locally
+    // if (this.props.localUpdatedEditor && (prevProps.localUpdatedEditor !== this.props.localUpdatedEditor)) {
+    //   console.log("this is the localUpdated Editor:", this.props.localUpdatedEditor)
+    //   const key = Object.keys(this.props.localUpdatedEditor)[0]
+    //   console.log("this is the key:", Object.keys(this.props.localUpdatedEditor)[0])
+    //   console.log("this is the data:",this.props.localUpdatedEditor[key])
+    //   this.setState(prevState => ({
+    //         editorComponents: {
+    //             ...prevState.editorComponents,
+    //             [key]: this.props.localUpdatedEditor[key]
+    //         }
+    //       }))
+    // }
 
+    //intial Fetch
     if (this.props.fetchedEditors && (Object.keys(this.state.editorComponents).length === 0 && Object.keys(this.state.fetchedSketchfield).length === 0)) {
-      const { sketchfield, ...editors } = this.props.fetchedEditors;
-      if (Object.keys(editors).length !== 0) {
+      const { sketchfield, ...nonSketchfield } = this.props.fetchedEditors;
+      const { editorID, ...editors} = nonSketchfield
+      // console.log("this is editorID", editorID)
+      // if (Object.keys(editors).length !== 0) {
         this.setState({
-          editorIDs: [...Array(Object.keys(editors).length).keys()],
+          editorIDs: editorID,
+          // editorIDsNum: (Object.keys(editors).length + 1),
           editorComponents: editors,
-          fetchedSketchfield: this.props.fetchedEditors.sketchfield
+          fetchedSketchfield: sketchfield
         })
-      }
+      // }
+      // console.log("editorIDs on initial fetch:", this.state.editorIDs)
+      // console.log("editorCOmponents on initial fetch:", this.state.editorComponents)
     }
 
+    //Delete editor from screen
     if (this.props.deletedEditorId in this.state.editorComponents) {
       this.handleDelete();
     }
 
+    //Fetch updates
     if (prevProps.fetchedUpdate !== this.props.fetchedUpdate) {
       const key = this.props.fetchedUpdate.key;
-      if (key !== "sketchfield") {
-        this.setState(prevState => ({
-          editorComponents: {
-              ...prevState.editorComponents,
-              [key]: this.props.fetchedUpdate.val
-          }
-        }))
-      } else if (key === "sketchfield") {
+      if (key === "sketchfield") {
+        // console.log("sketchfield retrieved update from online")
         this.setState(prevState => ({
           fetchedSketchfield: this.props.fetchedUpdate.val,
           currentSketchField: this.props.fetchedUpdate.val,
           lastRef: JSON.parse(this.props.fetchedUpdate.val).objects
         }))
+      } else if (key === "editorID") {
+        // console.log("editorid retrieved update from online")
+        this.setState({
+          editorIDs: this.props.fetchedUpdate.val
+        })
+        // console.log("editorIDs on update fetch:", this.state.editorIDs)
+      } else if (key !== "sketchfield" || key !== "editorID") {
+        if (!this.state.editorComponents[key] || (this.state.editorComponents[key]["html"] !== this.props.fetchedUpdate.val["html"])) {
+          // console.log(this.state.editorComponents[key])
+          // console.log(this.props.fetchedUpdate.val)
+          // console.log("not the same content")
+          // console.log("editorcomponents retrieved update from online")
+          this.setState(prevState => ({
+            editorComponents: {
+                ...prevState.editorComponents,
+                [key]: this.props.fetchedUpdate.val
+            }
+          }))
+        }
       }
     }
 
+    //Send updated sketchfield to databse, and change state reflecting change
     if (this.sketchField.current && (this.state.lastRef.length < this.sketchField.current.toJSON().objects.length)) {
       const pathAndKey = `${this.props.path}/sketchfield`
       this.props.updateEditor({[pathAndKey]: JSON.stringify(this.sketchField.current)})
@@ -86,7 +125,6 @@ class Canvas extends Component {
         lastRef: this.sketchField.current.toJSON().objects
       })
     }
-
   }
 
   handleKeyDown = (event) => {
@@ -129,29 +167,30 @@ class Canvas extends Component {
         this.doubleClick(event);
       }
     }
-
   }
 
   doubleClick = (event) => {
     if (event.target.id === "canvas" && this.props.canvasDraggable === false){
       const x = event.clientX
       const y = (event.clientY - 60)
-      if ( this.state.editorIDs.length === 0) {
-        console.log(`This is the editorIDs length: ${this.state.editorIDs.length}`)
+      if ( this.state.editorIDs === 0) {
+        // console.log(`This is the editorIDs number: ${this.state.editorIDs}`)
         const key = `editor0`
         const pathAndKey = `${this.props.path}/${key}`
+        const pathAndEditorID = `${this.props.path}/editorID`
         this.setState({
-          editorIDs: [0],
+          editorIDs: 1,
           editorComponents: {[key]: {html: "", x:x, y:y}}
         })
         this.props.selectEditor(key)
-        this.props.addEditor({[pathAndKey]: {html: "", x:x, y:y}})
+        this.props.addEditor({[pathAndKey]: {html: "", x:x, y:y}, [pathAndEditorID]: 1})
+        // console.log("editorIDs on making first editor:", this.state.editorIDs)
       } else {
-        let id = (this.state.editorIDs[this.state.editorIDs.length - 1] + 1)
+        let id = (this.state.editorIDs)
         let key = `editor${id}`
         const pathAndKey = `${this.props.path}/${key}`
         this.setState(prevState => ({
-          editorIDs: [...prevState.editorIDs, id],
+          editorIDs: (id + 1),
           editorComponents: {
               ...prevState.editorComponents,
               [key]: {html: "", x:x, y:y}
@@ -160,7 +199,9 @@ class Canvas extends Component {
 
         this.props.selectEditor(key)
 
-        this.props.addEditor({[pathAndKey]: {html: "", x:x, y:y}})
+        const pathAndEditorID = `${this.props.path}/editorID`
+        this.props.addEditor({[pathAndKey]: {html: "", x:x, y:y}, [pathAndEditorID]: id + 1})
+        // console.log("editorIDs on making subsequent editors:", this.state.editorIDs)
       }
     }
   }
@@ -183,7 +224,7 @@ class Canvas extends Component {
   }
 
   handleMouseUp = () => {
-    this.props.setDragging(null)
+    // this.props.setDragging(null)
   }
 
   handleDelete = () => {
@@ -207,10 +248,6 @@ class Canvas extends Component {
     if (this.state.drawable === true){
       sketchFieldClass = "sketchField"
     }
-
-    // if (this.props.fetchedUpdate) {
-    //   console.log(this.props.fetchedUpdate)
-    // }
 
     return(
           <div>
@@ -284,7 +321,8 @@ function mapReduxStateToProps(reduxState) {
     canvasDraggable: reduxState.canvasDraggable,
     deletedEditorId: reduxState.deletedEditorId,
     fetchedEditors: reduxState.fetchedEditors,
-    fetchedUpdate: reduxState.fetchedUpdate
+    fetchedUpdate: reduxState.fetchedUpdate,
+    localUpdatedEditor: reduxState.localUpdatedEditor
   }
 }
 

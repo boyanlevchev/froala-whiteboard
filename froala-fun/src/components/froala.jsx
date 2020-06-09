@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
-import { selectEditor, setDragging, setCanvasDraggable, updateEditor, deleteEditor } from '../actions'
+import { selectEditor, setDragging, setCanvasDraggable, updateEditor, deleteEditor, updateEditorLocally } from '../actions'
 
 import FroalaEditor from 'react-froala-wysiwyg';
 import Froalaeditor from 'froala-editor'
@@ -39,22 +39,50 @@ import 'froala-editor/css/plugins/file.min.css';
 // Require Font Awesome.
 // import 'font-awesome/css/font-awesome.css';
 
+// const Codox = window.Codox
 
 class Editor extends Component {
 
   constructor(props) {
     super(props);
 
+    this.handleModelChange = this.handleModelChange.bind(this);
+    this.handleManualController = this.handleManualController.bind(this)
+
     this.state = {
-      firstClick: 0,
-      editorComponents: {},
-      editorIDs: [],
-      lastContentId: 0,
-      editorContents: {},
-      lastSubmittedEditorContents: {},
+      model: this.props.html,
+      // lastContentId: 0,
       styling: "",
       secondClick: {}
     };
+  }
+
+  toolbarButtonsLess = {
+    'moreRich': {
+      'buttons': ['insertImage', 'insertVideo', 'insertLink', 'insertFile', 'emoticons'],
+      buttonsVisible: 5
+    },
+    'custom': {
+      'buttons':['deleteItem']
+    }
+  }
+
+  toolbarButtonsMore = {
+    'moreRich': {
+        'buttons': ['insertImage', 'insertVideo', 'insertLink', 'insertFile', 'emoticons'],
+        buttonsVisible: 5
+      },
+    'moreText': {
+        'buttons': ['italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize', 'textColor', 'backgroundColor', 'inlineClass', 'inlineStyle', 'clearFormatting'],
+        buttonsVisible: 0
+      },
+    'moreParagraph': {
+        'buttons': ['alignLeft', 'formatOLSimple', 'alignRight', 'alignJustify', 'formatOL', 'formatUL', 'paragraphFormat', 'paragraphStyle', 'lineHeight', 'indent', 'quote'],
+        buttonsVisible: 0
+      },
+    'custom': {
+      'buttons':['deleteItem']
+    }
   }
 
   handleClick = () => {
@@ -68,21 +96,75 @@ class Editor extends Component {
     this.props.setDragging({key: this.props.id, yOffset: yOffset, xOffset: xOffset})
   }
 
-  handleChange = (editor) => {
-    const htmlPath = `${this.props.canvasPath}/${this.props.id}/html`
-    this.props.updateEditor({[htmlPath]: editor.html.get()})
+  handleManualController = function(initControls) {
+    initControls.initialize()
+    this.initControls = initControls;
   }
 
+  handleModelChange = function(model) {
+    const key = this.props.id
+    const x = this.props.x
+    const y = this.props.y
+    const htmlPath = `${this.props.canvasPath}/${this.props.id}/html`
+
+    if (this.state.model === "" && model !== "") {
+      if (this.initControls) {
+        console.log("triggered")
+        this.initControls.destroy();
+        this.setState({
+          model: model
+        })
+        // this.setState({
+        //   toolbarButtons: this.toolbarButtonsMore
+        // })
+        this.initControls.initialize()
+      }
+    }
+    if (this.state.model !== "" && model === "") {
+      if (this.initControls) {
+        this.initControls.destroy();
+        this.setState({
+          model: model
+        })
+        // this.setState({
+        //   toolbarButtons: this.toolbarButtonsLess
+        // })
+        this.initControls.initialize()
+      }
+    }
+
+    this.setState({
+      model: model
+    })
+
+    this.props.updateEditor({[htmlPath]: model})
+    this.props.updateEditorLocally({[key]: {html: model, x:x, y:y}})
+  }
+
+  // codoxInitialized = (editor) =>  {
+  //   //assume these are passed in from parent
+  //   // const {apiKey, docId, username} = this.props;
+  //   // const Codox = window.
+  //   //instantiate a Codox
+  //   this.codox = new window.Codox();
+
+  //   setTimeout(() =>  {
+  //     //start or join the session
+  //     this.codox.init({
+  //       app      : 'froala',
+  //       username : Math.floor((Math.random() * 10) + 1),
+  //       docId    : Math.floor((Math.random() * 100) + 1),
+  //       apiKey   : '0a9ee7fb-9c0a-4a05-9362-f5f36dbc4b58',
+  //       editor   : editor
+  //     });
+  //   }, 100);
+  // }
 
   render() {
     var self = this;
     let editorClass = "editor"
 
-    if (this.props.id === this.props.selectedEditor){
-      editorClass = "editor selected-editor"
-    }
-    // console.log(`${this.props.selectedEditor} = ${this.props.id}`)
-    // console.log(editorClass)
+    // console.log("editor render triggered")
 
     let style = {
       position: 'absolute',
@@ -107,29 +189,12 @@ class Editor extends Component {
       events: {
         'initialized': function() {
           this["itemId"] = self.props.id;
-          // self.state.initialHTML = this
-          // console.log(`initialized html: ${this['html']}`)
-          // setTimeout(froalaBanner(), 100);
-          // console.log('this is init this');
-          // console.log(this.html.get());
-
+          // console.log("initialized")
+          // self.codoxInitialized(this)
         },
-        // 'focus': function () {
-        //   // setTimeout(froalaBanner(), 100);
-        //   // console.log('this is focus this');
-        //   // console.log(this.html.get());
-        // },
-        // 'toolbar.show': function () {
-        //   // setTimeout(froalaBanner(), 100);
-        // },
-        'contentChanged': function () {
-          // console.log(this._reactInternalFiber.firstEffect.stateNode.firstElementChild.firstElementChild.children)
-          console.log(`content changed html: ${this.html.get()}`)
-          self.handleChange(this);
-        },
-        'click': (e) => {
-          this.handleClick(e);
-          this.props.setDragging(null);
+        'click': function(e)  {
+          self.handleClick(e);
+          self.props.setDragging(null);
         },
         'mousedown': (e) => {
           this.handleMouseDown(e);
@@ -140,36 +205,17 @@ class Editor extends Component {
           }
         },
         'keyup': (e) => {
-          // setTimeout(froalaBanner(), 100);
           if ( e.keyCode === 91 || e.keyCode === 93 ){
             this.props.setCanvasDraggable(false);
           }
         }
-        // ,
-        // 'video.uploadedToS3': function(link, key, response) {
-        //   console.log(`this is the video link: ${link}`)
-        // },
-        // 'image.uploadedToS3': function(link, key, response) {
-        //   console.log(`this is the image link: ${link}`)
-        // }
       },
-      toolbarButtons: {
-        'moreRich': {
-            'buttons': ['insertImage', 'insertVideo', 'insertLink', 'insertFile', 'emoticons'],
-            buttonsVisible: 5
-          },
-        'moreText': {
-            'buttons': ['bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'fontFamily', 'fontSize', 'textColor', 'backgroundColor', 'inlineClass', 'inlineStyle', 'clearFormatting', 'alignLeft', 'alignCenter', 'formatOLSimple', 'alignRight', 'alignJustify', 'formatOL', 'formatUL', 'paragraphFormat', 'paragraphStyle', 'lineHeight', 'outdent', 'indent', 'quote'],
-            buttonsVisible: 0
-          },
-        'custom': {
-          'buttons':['deleteItem']
-        }
-      },
-      key: self.props.styling,
-      autofocus: true,
-      toolbarInline: true,
+      toolbarButtons: this.state.model === "" ? this.toolbarButtonsLess : this.toolbarButtonsMore,
+      initOnClick: true,
       toolbarVisibleWithoutSelection: true,
+      key: self.props.styling,
+      autofocus: false,
+      toolbarInline: true,
       heightMin: '30',
       placeholderText: 'Type something \n or click inside me',
       charCounterCount: true,
@@ -177,7 +223,8 @@ class Editor extends Component {
       videoUploadToS3: self.props.secondClick,
       imageUploadToS3: self.props.secondClick
     }
-
+    // console.log("this is the model", this.state.model, typeof this.state.model)
+    // console.log("this is the toolbar", toolbarButtons)
     return (
       <div
         className={editorClass}
@@ -188,8 +235,11 @@ class Editor extends Component {
       >
         <FroalaEditor
           config={config}
-          model={this.props.html}
-          lastContentId={this.state.lastContentId}
+          model={this.state.model}
+          // model={this.state.content}
+          onModelChange={this.handleModelChange}
+          onManualControllerReady={this.handleManualController}
+          // lastContentId={this.state.lastContentId}
         />
       </div>
     );
@@ -202,7 +252,8 @@ function mapDispatchToProps(dispatch) {
     setDragging: setDragging,
     setCanvasDraggable: setCanvasDraggable,
     updateEditor: updateEditor,
-    deleteEditor: deleteEditor
+    deleteEditor: deleteEditor,
+    updateEditorLocally: updateEditorLocally
   },
     dispatch
   );

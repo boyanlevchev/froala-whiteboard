@@ -23,6 +23,14 @@ export function setCanvasDraggable(boolean) {
   }
 }
 
+export function updateEditorLocally(editor) {
+  return {
+    type: 'UPDATE_EDITOR_LOCALLY',
+    payload: editor
+  }
+  // console.log("this shit got updated yo")
+};
+
 export const addEditor = (newEditor) => async dispatch => {
   database.ref().update(newEditor);
   // database.ref(pathAndKey).set(newEditor);

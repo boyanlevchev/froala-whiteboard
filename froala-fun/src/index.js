@@ -16,6 +16,7 @@ import setCanvasDraggable from './reducers/set_canvas_draggable_reducer'
 import fetchEditorReducer from './reducers/fetch_editor_reducer'
 import deleteEditorReducer from './reducers/delete_editor_reducer'
 import fetchUpdateReducer from './reducers/fetch_update_reducer'
+import updateEditorLocallyReducer from './reducers/update_editor_locally_reducer'
 
 const reducers = combineReducers({
   selectedEditor: selectedEditorReducer,
@@ -23,7 +24,8 @@ const reducers = combineReducers({
   canvasDraggable: setCanvasDraggable,
   fetchedEditors: fetchEditorReducer,
   deletedEditorId: deleteEditorReducer,
-  fetchedUpdate: fetchUpdateReducer
+  fetchedUpdate: fetchUpdateReducer,
+  localUpdatedEditor: updateEditorLocallyReducer
 });
 
 ReactDOM.render(

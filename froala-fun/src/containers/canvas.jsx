@@ -264,7 +264,7 @@ class Canvas extends Component {
     return(
           <div>
             <div id="canvas-header">
-              <h1>Froala Canvas</h1>
+              <h1>Froala Whiteboard</h1>
             </div>
             <div
               id="canvas"

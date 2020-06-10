@@ -85,7 +85,30 @@ class Editor extends Component {
     }
   }
 
-  handleClick = () => {
+  // static getDerivedStateFromProps(props, current_state) {
+  //   if (current_state.model !== props.html) {
+  //     return {
+  //       model: props.html
+  //     }
+  //   }
+  //   return null
+  // }
+
+  componentDidUpdate(prevProps){
+    if ((prevProps.html)&&(this.state.model === prevProps.html)) {
+      return
+    } else if ((prevProps.html !== this.props.html) && (this.state.model !== this.props.html)){
+      console.log('2',this.state.model)
+      console.log('3',prevProps.html)
+      console.log('4',this.props.html)
+      console.log("this has triggered")
+      this.setState({
+        model: this.props.html
+      })
+    }
+  }
+
+  handleClick = (e) => {
     this.props.selectEditor(this.props.id)
   }
 
@@ -93,7 +116,15 @@ class Editor extends Component {
     this.props.selectEditor(this.props.id)
     const yOffset = (event.clientY-this.props.y)
     const xOffset = (event.clientX-this.props.x)
-    this.props.setDragging({key: this.props.id, yOffset: yOffset, xOffset: xOffset})
+    // console.log("props.y", this.props.y)
+    // console.log("props.x", this.props.x)
+    // console.log("the x event", event.clientX)
+    // console.log("the y event", event.clientY)
+    // console.log("xoffset:", xOffset)
+    // console.log("yoffset:", yOffset)
+    if (xOffset && yOffset){
+      this.props.setDragging({key: this.props.id, yOffset: yOffset, xOffset: xOffset})
+    }
   }
 
   handleManualController = function(initControls) {
@@ -102,69 +133,42 @@ class Editor extends Component {
   }
 
   handleModelChange = function(model) {
-    const key = this.props.id
+    const htmlPath = `${this.props.canvasPath}/${this.props.id}/html`
     const x = this.props.x
     const y = this.props.y
-    const htmlPath = `${this.props.canvasPath}/${this.props.id}/html`
 
-    if (this.state.model === "" && model !== "") {
+    if ((this.state.model === "" && model !== "") || (this.state.model !== "" && model === "")) {
       if (this.initControls) {
         console.log("triggered")
         this.initControls.destroy();
         this.setState({
           model: model
         })
-        // this.setState({
-        //   toolbarButtons: this.toolbarButtonsMore
-        // })
         this.initControls.initialize()
+        const editor = this.initControls.getEditor()
+        setTimeout(function(){
+          editor.events.focus();
+          editor.selection.setAtEnd(editor.$el.get(0));
+          editor.selection.restore();
+        }, 100);
       }
-    }
-    if (this.state.model !== "" && model === "") {
-      if (this.initControls) {
-        this.initControls.destroy();
-        this.setState({
-          model: model
-        })
-        // this.setState({
-        //   toolbarButtons: this.toolbarButtonsLess
-        // })
-        this.initControls.initialize()
-      }
+    } else {
+      this.setState({
+        model: model
+      })
     }
 
-    this.setState({
-      model: model
-    })
-
+    this.props.updateEditorLocally({[this.props.id]: {html: model, x:x, y:y}})
     this.props.updateEditor({[htmlPath]: model})
-    this.props.updateEditorLocally({[key]: {html: model, x:x, y:y}})
   }
-
-  // codoxInitialized = (editor) =>  {
-  //   //assume these are passed in from parent
-  //   // const {apiKey, docId, username} = this.props;
-  //   // const Codox = window.
-  //   //instantiate a Codox
-  //   this.codox = new window.Codox();
-
-  //   setTimeout(() =>  {
-  //     //start or join the session
-  //     this.codox.init({
-  //       app      : 'froala',
-  //       username : Math.floor((Math.random() * 10) + 1),
-  //       docId    : Math.floor((Math.random() * 100) + 1),
-  //       apiKey   : '0a9ee7fb-9c0a-4a05-9362-f5f36dbc4b58',
-  //       editor   : editor
-  //     });
-  //   }, 100);
-  // }
 
   render() {
     var self = this;
     let editorClass = "editor"
 
-    // console.log("editor render triggered")
+    if (this.props.selectedEditor === this.props.id) {
+      editorClass = "editor selected-editor"
+    }
 
     let style = {
       position: 'absolute',
@@ -178,11 +182,12 @@ class Editor extends Component {
       title: 'Delete this item',
       focus: true,
       undo: true,
-      refreshAfterCallback: true,
+      refreshAfterCallback: false,
       callback: function() {
         const htmlPath = `${self.props.canvasPath}/${this.itemId}`
-        self.props.deleteEditor(htmlPath)
-      },
+        this.toolbar.hide()
+        self.props.deleteEditor(htmlPath);
+      }
     })
 
     const config = {
@@ -223,8 +228,6 @@ class Editor extends Component {
       videoUploadToS3: self.props.secondClick,
       imageUploadToS3: self.props.secondClick
     }
-    // console.log("this is the model", this.state.model, typeof this.state.model)
-    // console.log("this is the toolbar", toolbarButtons)
     return (
       <div
         className={editorClass}
@@ -236,10 +239,8 @@ class Editor extends Component {
         <FroalaEditor
           config={config}
           model={this.state.model}
-          // model={this.state.content}
           onModelChange={this.handleModelChange}
           onManualControllerReady={this.handleManualController}
-          // lastContentId={this.state.lastContentId}
         />
       </div>
     );
@@ -262,7 +263,8 @@ function mapDispatchToProps(dispatch) {
 function mapReduxStateToProps(reduxState) {
   return {
     selectedEditor: reduxState.selectedEditor,
-    canvasDraggable: reduxState.canvasDraggable
+    canvasDraggable: reduxState.canvasDraggable,
+    localUpdatedEditor: reduxState.localUpdatedEditor
   }
 }
 

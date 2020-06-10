@@ -90,7 +90,7 @@ export const fetchUpdates = (canvas) => async dispatch => {
     // console.log("child removed")
     dispatch({
       type: 'FETCH_UPDATE',
-      payload: {key: data.key, val: data.val()}
+      payload: {childDeleted: {key: data.key, val: data.val()}}
     });
   });
 };

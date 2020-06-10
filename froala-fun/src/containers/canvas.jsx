@@ -32,15 +32,12 @@ class Canvas extends Component {
   }
 
   componentDidMount() {
-    // <script src="https://app.codox.io/plugins/wave.client.js?apiKey=0a9ee7fb-9c0a-4a05-9362-f5f36dbc4b58&app=froala" type="text/javascript"></script>
-
     fetch('/api/get_signature').then(res => res.json()).then( res => {
-      this.setState({secondClick:res})
+      this.setState({secondClick: res})
     })
     fetch('/api/get_frofro').then(res => res.text()).then( res => {
       this.setState({styling: res})
     })
-    // console.log(fetch( '/get_signature').then(res => res.json()))
     this.props.fetchEditors(this.props.path.substring(1))
     this.props.fetchUpdates(this.props.path.substring(1))
   }
@@ -48,35 +45,32 @@ class Canvas extends Component {
   componentDidUpdate(prevProps) {
     // console.log("updated!")
     // console.log(this.props)
-    //updaet locally
-    // if (this.props.localUpdatedEditor && (prevProps.localUpdatedEditor !== this.props.localUpdatedEditor)) {
-    //   console.log("this is the localUpdated Editor:", this.props.localUpdatedEditor)
-    //   const key = Object.keys(this.props.localUpdatedEditor)[0]
-    //   console.log("this is the key:", Object.keys(this.props.localUpdatedEditor)[0])
-    //   console.log("this is the data:",this.props.localUpdatedEditor[key])
-    //   this.setState(prevState => ({
-    //         editorComponents: {
-    //             ...prevState.editorComponents,
-    //             [key]: this.props.localUpdatedEditor[key]
-    //         }
-    //       }))
-    // }
+    // updaet locally
+    if (this.props.localUpdatedEditor && (prevProps.localUpdatedEditor !== this.props.localUpdatedEditor)) {
+      // console.log("this is the localUpdated Editor:", this.props.localUpdatedEditor)
+      const key = Object.keys(this.props.localUpdatedEditor)[0]
+      // console.log("this is the key:", Object.keys(this.props.localUpdatedEditor)[0])
+      // console.log("this is the data:",this.props.localUpdatedEditor[key])
+      this.setState(prevState => ({
+            editorComponents: {
+                ...prevState.editorComponents,
+                [key]: {html: this.props.localUpdatedEditor[key]['html']}
+            }
+          }))
+    }
 
     //intial Fetch
-    if (this.props.fetchedEditors && (Object.keys(this.state.editorComponents).length === 0 && Object.keys(this.state.fetchedSketchfield).length === 0)) {
+    if (this.props.fetchedEditors
+      && this.state.editorComponents
+      && this.state.fetchedSketchfield
+      && (Object.keys(this.state.editorComponents).length === 0 && Object.keys(this.state.fetchedSketchfield).length === 0)) {
       const { sketchfield, ...nonSketchfield } = this.props.fetchedEditors;
       const { editorID, ...editors} = nonSketchfield
-      // console.log("this is editorID", editorID)
-      // if (Object.keys(editors).length !== 0) {
         this.setState({
           editorIDs: editorID,
-          // editorIDsNum: (Object.keys(editors).length + 1),
           editorComponents: editors,
           fetchedSketchfield: sketchfield
         })
-      // }
-      // console.log("editorIDs on initial fetch:", this.state.editorIDs)
-      // console.log("editorCOmponents on initial fetch:", this.state.editorComponents)
     }
 
     //Delete editor from screen
@@ -86,33 +80,51 @@ class Canvas extends Component {
 
     //Fetch updates
     if (prevProps.fetchedUpdate !== this.props.fetchedUpdate) {
-      const key = this.props.fetchedUpdate.key;
-      if (key === "sketchfield") {
-        // console.log("sketchfield retrieved update from online")
-        this.setState(prevState => ({
-          fetchedSketchfield: this.props.fetchedUpdate.val,
-          currentSketchField: this.props.fetchedUpdate.val,
-          lastRef: JSON.parse(this.props.fetchedUpdate.val).objects
-        }))
-      } else if (key === "editorID") {
-        // console.log("editorid retrieved update from online")
-        this.setState({
-          editorIDs: this.props.fetchedUpdate.val
-        })
-        // console.log("editorIDs on update fetch:", this.state.editorIDs)
-      } else if (key !== "sketchfield" || key !== "editorID") {
-        if (!this.state.editorComponents[key] || (this.state.editorComponents[key]["html"] !== this.props.fetchedUpdate.val["html"])) {
-          // console.log(this.state.editorComponents[key])
-          // console.log(this.props.fetchedUpdate.val)
-          // console.log("not the same content")
-          // console.log("editorcomponents retrieved update from online")
+      if (!this.props.fetchedUpdate.childDeleted) {
+        const key = this.props.fetchedUpdate.key;
+        if (key === "sketchfield") {
+          // console.log("sketchfield retrieved update from online")
           this.setState(prevState => ({
-            editorComponents: {
-                ...prevState.editorComponents,
-                [key]: this.props.fetchedUpdate.val
-            }
+            fetchedSketchfield: this.props.fetchedUpdate.val,
+            currentSketchField: this.props.fetchedUpdate.val,
+            lastRef: JSON.parse(this.props.fetchedUpdate.val).objects
           }))
+        } else if (key === "editorID") {
+          this.setState({
+            editorIDs: this.props.fetchedUpdate.val
+          })
+        } else if (key !== "sketchfield" && key !== "editorID") {
+          if (!this.state.editorComponents[key]) {
+            this.setState(prevState => ({
+              editorComponents: {
+                  ...prevState.editorComponents,
+                  [key]: this.props.fetchedUpdate.val
+              }
+            }))
+          } else if ((this.state.editorComponents[key]["html"] !== this.props.fetchedUpdate.val["html"])) {
+            this.setState(prevState => ({
+              editorComponents: {
+                  ...prevState.editorComponents,
+                  [key]: this.props.fetchedUpdate.val
+              }
+            }))
+          } else if ((this.state.editorComponents[key]['x']!== this.props.fetchedUpdate.val['x'])
+            || (this.state.editorComponents[key]['y']!== this.props.fetchedUpdate.val['y'])) {
+            this.setState(prevState => ({
+              editorComponents: {
+                  ...prevState.editorComponents,
+                  [key]: {x: this.props.fetchedUpdate.val['x'], y: this.props.fetchedUpdate.val['y']}
+              }
+            }))
+          }
         }
+      } else if (this.props.fetchedUpdate.childDeleted){
+        let newEditorComponents = this.state.editorComponents
+
+        delete newEditorComponents[this.props.fetchedUpdate.childDeleted.key]
+        this.setState({
+          editorComponents: newEditorComponents
+        })
       }
     }
 
@@ -152,7 +164,6 @@ class Canvas extends Component {
   }
 
   handleClick = (event) => {
-    // froalaBanner(); // temporary
     if (event.target.id === "canvas"){
       this.props.selectEditor(null)
     }
@@ -174,7 +185,6 @@ class Canvas extends Component {
       const x = event.clientX
       const y = (event.clientY - 60)
       if ( this.state.editorIDs === 0) {
-        // console.log(`This is the editorIDs number: ${this.state.editorIDs}`)
         const key = `editor0`
         const pathAndKey = `${this.props.path}/${key}`
         const pathAndEditorID = `${this.props.path}/editorID`
@@ -184,7 +194,6 @@ class Canvas extends Component {
         })
         this.props.selectEditor(key)
         this.props.addEditor({[pathAndKey]: {html: "", x:x, y:y}, [pathAndEditorID]: 1})
-        // console.log("editorIDs on making first editor:", this.state.editorIDs)
       } else {
         let id = (this.state.editorIDs)
         let key = `editor${id}`
@@ -201,30 +210,33 @@ class Canvas extends Component {
 
         const pathAndEditorID = `${this.props.path}/editorID`
         this.props.addEditor({[pathAndKey]: {html: "", x:x, y:y}, [pathAndEditorID]: id + 1})
-        // console.log("editorIDs on making subsequent editors:", this.state.editorIDs)
       }
     }
   }
 
   handleMouseMove = (event) => {
+
     if(this.props.draggableEditor !== null && this.props.canvasDraggable === true){
+
       let key = this.props.draggableEditor.key
       const x = (event.clientX - this.props.draggableEditor.xOffset)
       const y = (event.clientY - this.props.draggableEditor.yOffset)
-      this.setState(prevState => ({
-          editorComponents: {
-              ...prevState.editorComponents,
-              [key]: {html: this.state.editorComponents.html, x:x, y:y}
-          }
-        }))
-      const xPath = `${this.props.path}/${key}/x`
-      const yPath = `${this.props.path}/${key}/y`
-      this.props.updateEditor({[xPath]:x, [yPath]:y})
+      if (x && y){
+        this.setState(prevState => ({
+            editorComponents: {
+                ...prevState.editorComponents,
+                [key]: {x:x, y:y}
+            }
+          }))
+        const xPath = `${this.props.path}/${key}/x`
+        const yPath = `${this.props.path}/${key}/y`
+        this.props.updateEditor({[xPath]:x, [yPath]:y})
+      }
     }
   }
 
   handleMouseUp = () => {
-    // this.props.setDragging(null)
+    this.props.setDragging(null)
   }
 
   handleDelete = () => {

@@ -223,7 +223,6 @@ class Editor extends Component {
       toolbarInline: true,
       heightMin: '30',
       placeholderText: 'Type something \n or click inside me',
-      charCounterCount: true,
       attribution: false,
       videoUploadToS3: self.props.secondClick,
       imageUploadToS3: self.props.secondClick

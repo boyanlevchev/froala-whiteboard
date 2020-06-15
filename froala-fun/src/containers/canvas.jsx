@@ -32,10 +32,10 @@ class Canvas extends Component {
   }
 
   componentDidMount() {
-    fetch('/api/get_signature').then(res => res.json()).then( res => {
+    fetch('http://froala-whiteboard.herokuapp.com/api/get_signature').then(res => res.json()).then( res => {
       this.setState({secondClick: res})
     })
-    fetch('/api/get_frofro').then(res => res.text()).then( res => {
+    fetch('http://froala-whiteboard.herokuapp.com/api/get_frofro').then(res => res.text()).then( res => {
       this.setState({styling: res})
     })
     this.props.fetchEditors(this.props.path.substring(1))
@@ -43,14 +43,8 @@ class Canvas extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    // console.log("updated!")
-    // console.log(this.props)
-    // updaet locally
     if (this.props.localUpdatedEditor && (prevProps.localUpdatedEditor !== this.props.localUpdatedEditor)) {
-      // console.log("this is the localUpdated Editor:", this.props.localUpdatedEditor)
       const key = Object.keys(this.props.localUpdatedEditor)[0]
-      // console.log("this is the key:", Object.keys(this.props.localUpdatedEditor)[0])
-      // console.log("this is the data:",this.props.localUpdatedEditor[key])
       this.setState(prevState => ({
             editorComponents: {
                 ...prevState.editorComponents,
@@ -83,7 +77,6 @@ class Canvas extends Component {
       if (!this.props.fetchedUpdate.childDeleted) {
         const key = this.props.fetchedUpdate.key;
         if (key === "sketchfield") {
-          // console.log("sketchfield retrieved update from online")
           this.setState(prevState => ({
             fetchedSketchfield: this.props.fetchedUpdate.val,
             currentSketchField: this.props.fetchedUpdate.val,

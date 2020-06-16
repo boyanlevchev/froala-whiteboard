@@ -32,10 +32,10 @@ class Canvas extends Component {
   }
 
   componentDidMount() {
-    fetch('/api/get_signature').then(res => res.json()).then( res => {
+    fetch('https://froala-whiteboard.herokuapp.com/api/get_signature').then(res => res.json()).then( res => {
       this.setState({secondClick: res})
     })
-    fetch('/api/get_frofro').then(res => res.text()).then( res => {
+    fetch('https://froala-whiteboard.herokuapp.com/api/get_frofro').then(res => res.text()).then( res => {
       this.setState({styling: res})
     })
     this.props.fetchEditors(this.props.path.substring(1))

@@ -30,7 +30,7 @@ function CanvasHolder() {
   const location = useLocation();
   const history = useHistory();
   let path = "";
-  if (location.pathname === '/') {
+  if (location.pathname === '/' || location.pathname === '/contact/') {
     path = `/${urlCalculator() + urlCalculator() + urlCalculator()}`
     history.push(path);
   } else {

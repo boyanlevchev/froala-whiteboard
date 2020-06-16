@@ -72,9 +72,9 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-var allowedOrigins = ['https://localhost:3000',
-                      'https://froala-whiteboard.herokuapp.com',
-                      'https://floopshoop.wpcomstaging.com']
+var allowedOrigins = ['http://localhost:3000',
+                      'http://froala-whiteboard.herokuapp.com',
+                      'http://floopshoop.wpcomstaging.com']
 
 app.use(cors({
   origin: function(origin, callback){

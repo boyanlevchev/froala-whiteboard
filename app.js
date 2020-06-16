@@ -13,8 +13,8 @@ var frofroRouter = require('./routes/get_frofro');
 
 var allowedOrigins = ['http://localhost:3000',
                       'http://froala-whiteboard.herokuapp.com',
-                      'http://floopshoop.wpcomstaging.com',
-                      'https://floopshoop.wpcomstaging.com']
+                      'http://floopshoop.wpcomstaging.com/contact/',
+                      'https://floopshoop.wpcomstaging.com/contact/']
 
 var corsOptions = {
   origin: function (origin, callback) {

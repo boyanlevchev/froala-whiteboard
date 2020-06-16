@@ -33,11 +33,14 @@ function CanvasHolder() {
   let path = "";
   //If statement checks to see if site is accessed without unqiue url - if so, unique url is appended
   //The second condition exists to allow the site to detremine if whiteboard is being accessed through froala.com/wyswig-editor/whiteboard
-  if (location.pathname === '/' || location.pathname === '/contact/') {
+  if (location.pathname === '/') {
     path = `/${urlCalculator() + urlCalculator() + urlCalculator()}` //path generated using url calculator function
-    history.push(location.pathname + path); //history.push appends the unique path - in case unique path is led by /wyswig-editor/whiteboard we first push that, and then add unique path
-  } else if (location.pathname.includes('/contact/')) {
-    path = location.pathname.replace('/contact/', '') //create path from unqiue path, by removing paths existent on froala website
+    history.push(path); //history.push appends the unique path - in case unique path is led by /wyswig-editor/whiteboard we first push that, and then add unique path
+  } else if (location.pathname === '/contact/' || location.pathname === '/contact') {
+    path = `/${urlCalculator() + urlCalculator() + urlCalculator()}` //path generated using url calculator function
+    history.push('/contact' + path);
+  } else if (location.pathname.includes('/contact/')) { //should only reach here if above conditions are not met, implying there is a unique url following pathname
+    path = location.pathname.replace('/contact', '') //create path from unqiue path, by removing paths existent on froala website
   } else {
     path = location.pathname // if unique path is already present and site is access via herokuapp domain (i.e. site is accessed via unique link, then set path variable to what follows root)
   }

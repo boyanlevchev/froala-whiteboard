@@ -23,6 +23,7 @@ var corsOptions = {
       console.log("the origin is:", origin)
       callback(null, true)
     } else {
+      console.log("the origin is:", origin)
       callback(new Error('Not allowed by CORS'))
     }
   }

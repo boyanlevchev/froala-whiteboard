@@ -11,27 +11,51 @@ var usersRouter = require('./routes/users');
 var signatureRouter = require('./routes/get_signature');
 var frofroRouter = require('./routes/get_frofro');
 
-var allowedOrigins = ['http://localhost:3000',
+// var allowedOrigins = ['http://localhost:3000',
+//                       'http://froala-whiteboard.herokuapp.com/',
+//                       'https://froala-whiteboard.herokuapp.com/',
+//                       'http://floopshoop.wpcomstaging.com/contact/',
+//                       'https://floopshoop.wpcomstaging.com/contact/']
+
+conf = {
+    // look for PORT environment variable,
+    // else look for CLI argument,
+    // else use hard coded value for port 8080
+    // port: process.env.PORT || process.argv[2] || 3,
+    // origin undefined handler
+    // see https://github.com/expressjs/cors/issues/71
+    originUndefined: function (req, res, next) {
+        if (!req.headers.origin) {
+            res.json({
+                mess: 'Hi you are visiting the service locally. If this was a CORS the origin header should not be undefined'
+            });
+        } else {
+            next();
+        }
+    },
+    // Cross Origin Resource Sharing Options
+    cors: {
+        // origin handler
+        origin: function (origin, cb) {
+            // setup a white list
+            let wl = ['http://localhost:3000',
                       'http://froala-whiteboard.herokuapp.com/',
                       'https://froala-whiteboard.herokuapp.com/',
                       'http://floopshoop.wpcomstaging.com/contact/',
-                      'https://floopshoop.wpcomstaging.com/contact/']
-
-var corsOptions = {
-  origin: function (origin, callback) {
-    if (allowedOrigins.includes(origin)) {
-      console.log("the origin is:", origin)
-      callback(null, true)
-    } else {
-      // console.log("the origin is:", origin)
-      callback(new Error('Not allowed by CORS: ' + origin))
+                      'https://floopshoop.wpcomstaging.com/contact/'];
+            if (wl.indexOf(origin) != -1) {
+                cb(null, true);
+            } else {
+                cb(new Error('invalid origin: ' + origin), false);
+            }
+        },
+        optionsSuccessStatus: 200
     }
-  }
-}
+};
 
 var app = express();
 
-app.use(cors(corsOptions))
+app.use(conf.originUndefined, cors(conf.cors))
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

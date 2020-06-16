@@ -12,13 +12,15 @@ var signatureRouter = require('./routes/get_signature');
 var frofroRouter = require('./routes/get_frofro');
 
 var allowedOrigins = ['http://localhost:3000',
-                      'http://froala-whiteboard.herokuapp.com',
+                      'http://froala-whiteboard.herokuapp.com/',
+                      'https://froala-whiteboard.herokuapp.com/',
                       'http://floopshoop.wpcomstaging.com/contact/',
                       'https://floopshoop.wpcomstaging.com/contact/']
 
 var corsOptions = {
   origin: function (origin, callback) {
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (allowedOrigins.includes(origin)) {
+      console.log("the origin is:", origin)
       callback(null, true)
     } else {
       callback(new Error('Not allowed by CORS'))

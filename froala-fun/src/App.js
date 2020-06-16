@@ -22,6 +22,7 @@ function App() {
   );
 }
 
+//url calculator function - simple random number generator
 function urlCalculator() {
   return Math.floor(Math.random()*9000000000000+1000000000000).toString(36).substring(0, 15)
 }
@@ -30,14 +31,18 @@ function CanvasHolder() {
   const location = useLocation();
   const history = useHistory();
   let path = "";
+  //If statement checks to see if site is accessed without unqiue url - if so, unique url is appended
+  //The second condition exists to allow the site to detremine if whiteboard is being accessed through froala.com/wyswig-editor/whiteboard
   if (location.pathname === '/' || location.pathname === '/contact/') {
-    path = `/${urlCalculator() + urlCalculator() + urlCalculator()}`
-    history.push(path);
+    path = `/${urlCalculator() + urlCalculator() + urlCalculator()}` //path generated using url calculator function
+    history.push(history + path); //history.push appends the unique path - in case unique path is led by /wyswig-editor/whiteboard we first push that, and then add unique path
+  } else if (location.pathname.includes('/contact/')) {
+    path = location.pathname.replace('/contact/', '') //create path from unqiue path, by removing paths existent on froala website
   } else {
-    path = location.pathname
-    // console.log(`location pathname: ${location.pathname}`)
+    path = location.pathname // if unique path is already present and site is access via herokuapp domain (i.e. site is accessed via unique link, then set path variable to what follows root)
   }
 
+  //render canvas (whiteboard) component
   return (
     <div className="App">
       <Canvas path={path}/>

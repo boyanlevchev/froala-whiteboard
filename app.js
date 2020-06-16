@@ -93,7 +93,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/get_signature', signatureRouter);
 app.use('/api/get_frofro', frofroRouter);
 
-app.get('*', , (req, res) => {
+app.get('*', cors(corsOptions), (req, res) => {
   res.sendFile(path.join(__dirname, 'froala-fun','build','index.html'))
 })
 

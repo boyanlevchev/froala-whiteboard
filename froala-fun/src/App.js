@@ -35,7 +35,7 @@ function CanvasHolder() {
   //The second condition exists to allow the site to detremine if whiteboard is being accessed through froala.com/wyswig-editor/whiteboard
   if (location.pathname === '/' || location.pathname === '/contact/') {
     path = `/${urlCalculator() + urlCalculator() + urlCalculator()}` //path generated using url calculator function
-    history.push(history + path); //history.push appends the unique path - in case unique path is led by /wyswig-editor/whiteboard we first push that, and then add unique path
+    history.push(location.pathname + path); //history.push appends the unique path - in case unique path is led by /wyswig-editor/whiteboard we first push that, and then add unique path
   } else if (location.pathname.includes('/contact/')) {
     path = location.pathname.replace('/contact/', '') //create path from unqiue path, by removing paths existent on froala website
   } else {

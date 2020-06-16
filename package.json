@@ -6,6 +6,7 @@
     "start": "node ./bin/www",
     "heroku-postbuild": "cd froala-fun && npm install --only=dev && npm install && npm run build"
   },
+  "homepage": "https://froala-whiteboard.herokuapp.com",
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "crypto": "^1.0.1",

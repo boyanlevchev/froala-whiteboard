@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var cors = require('cors');
 require('dotenv').config();
 
 var allowedOrigins = ['http://localhost:3000',
@@ -24,7 +25,7 @@ var corsOptions = {
 }
 
 /* GET users listing. */
-router.get('/', cors(corsOptions), function(req, res, next) {
+router.get('/', function(req, res, next) {
   res.send(process.env.FROALA_KEY)
   // res.send('respond with a resource');
 });

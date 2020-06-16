@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var cors = require('cors');
 require('dotenv').config();
 
 var allowedOrigins = ['http://localhost:3000',

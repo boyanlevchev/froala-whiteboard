@@ -11,66 +11,51 @@ var usersRouter = require('./routes/users');
 var signatureRouter = require('./routes/get_signature');
 var frofroRouter = require('./routes/get_frofro');
 
-var allowedOrigins = ['http://localhost:3000',
-                      'http://froala-whiteboard.herokuapp.com/',
-                      'https://froala-whiteboard.herokuapp.com/',
-                      'http://floopshoop.wpcomstaging.com/contact/',
-                      'https://floopshoop.wpcomstaging.com/contact/']
-
-var corsOptions = {
-  origin: function(origin, callback){
-    // allow requests with no origin
-    // (like mobile apps or curl requests)
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1){
-      var msg = 'The CORS policy for this site does not ' +
-                'allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  optionsSuccessStatus: 200
-}
-
-// conf = {
-//     // look for PORT environment variable,
-//     // else look for CLI argument,
-//     // else use hard coded value for port 8080
-//     // port: process.env.PORT || process.argv[2] || 3,
-//     // origin undefined handler
-//     // see https://github.com/expressjs/cors/issues/71
-//     originUndefined: function (req, res, next) {
-//         if (!req.headers.origin) {
-//             res.json({
-//                 mess: 'Hi you are visiting the service locally. If this was a CORS the origin header should not be undefined'
-//             });
-//         } else {
-//             next();
-//         }
-//     },
-//     // Cross Origin Resource Sharing Options
-//     cors: {
-//         // origin handler
-//         origin: function (origin, cb) {
-//             // setup a white list
-//             let wl = ['http://localhost:3000',
+// var allowedOrigins = [
+//                       'http://localhost:3000',
 //                       'http://froala-whiteboard.herokuapp.com/',
 //                       'https://froala-whiteboard.herokuapp.com/',
 //                       'http://floopshoop.wpcomstaging.com/contact/',
-//                       'https://floopshoop.wpcomstaging.com/contact/'];
-//             if (wl.indexOf(origin) != -1) {
-//                 cb(null, true);
-//             } else {
-//                 cb(new Error('invalid origin: ' + origin), false);
-//             }
-//         },
-//         optionsSuccessStatus: 200
+//                       'https://floopshoop.wpcomstaging.com/contact/']
+
+// var corsOptions = {
+//   origin: function(origin, callback){
+//     // allow requests with no origin
+//     // (like mobile apps or curl requests)
+//     if(!origin) return callback(null, true);
+//     if(allowedOrigins.indexOf(origin) === -1){
+//       var msg = 'The CORS policy for this site does not ' +
+//                 'allow access from the specified Origin.';
+//       return callback(new Error(msg), false);
 //     }
-// };
+//     return callback(null, true);
+//   },
+//   optionsSuccessStatus: 200
+// }
+
+var cors = function(req, res, next) {
+  var whitelist = [
+    'http://localhost:3000',
+    'http://froala-whiteboard.herokuapp.com/',
+    'https://froala-whiteboard.herokuapp.com/',
+    'http://floopshoop.wpcomstaging.com/contact/',
+    'https://floopshoop.wpcomstaging.com/contact/',
+    'http://floopshoop.wpcomstaging.com/',
+    'https://floopshoop.wpcomstaging.com'
+  ];
+  var origin = req.headers.origin;
+  if (whitelist.indexOf(origin) > -1) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  next();
+}
 
 var app = express();
 
-app.use(cors(corsOptions))
+app.use(cors);
+// app.use(cors(corsOptions))
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -93,7 +78,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/get_signature', signatureRouter);
 app.use('/api/get_frofro', frofroRouter);
 
-app.get('*', cors(corsOptions), (req, res) => {
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'froala-fun','build','index.html'))
 })
 

@@ -3,42 +3,34 @@ var router = express.Router();
 var cors = require('cors');
 require('dotenv').config();
 
-var allowedOrigins = ['http://localhost:3000',
-                      'http://froala-whiteboard.herokuapp.com/',
-                      'https://froala-whiteboard.herokuapp.com/',
-                      'http://floopshoop.wpcomstaging.com/contact/',
-                      'https://floopshoop.wpcomstaging.com/contact/']
+// var allowedOrigins = ['http://localhost:3000',
+//                       'http://froala-whiteboard.herokuapp.com/',
+//                       'https://froala-whiteboard.herokuapp.com/',
+//                       'http://floopshoop.wpcomstaging.com/contact/',
+//                       'https://floopshoop.wpcomstaging.com/contact/']
 
-var corsOptions = {
-  origin: function(origin, callback){
-    // allow requests with no origin
-    // (like mobile apps or curl requests)
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1){
-      var msg = 'The CORS policy for this site does not ' +
-                'allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  optionsSuccessStatus: 200
-}
+// var corsOptions = {
+//   origin: function(origin, callback){
+//     // allow requests with no origin
+//     // (like mobile apps or curl requests)
+//     if(!origin) return callback(null, true);
+//     if(allowedOrigins.indexOf(origin) === -1){
+//       var msg = 'The CORS policy for this site does not ' +
+//                 'allow access from the specified Origin.';
+//       return callback(new Error(msg), false);
+//     }
+//     return callback(null, true);
+//   },
+//   optionsSuccessStatus: 200
+// }
 
-// var app = express();
-// var bodyParser = require('body-parser')
-// var path = require('path');
-// var fs = require('fs');
-// var gm = require('gm').subClass({imageMagick: true});
+
 var FroalaEditor = require('wysiwyg-editor-node-sdk');
-
-// app.use(express.static(__dirname + '/'));
-// app.use('/bower_components',  express.static(path.join(__dirname, '../bower_components')));
-// app.use(bodyParser.urlencoded({ extended: false }));
 
 var moment = require('moment');
 var crypto = require('crypto');
 
-router.get('/', cors(corsOptions), function (req, res, next) {
+router.get('/', function (req, res, next) {
   var s3Config = {
       bucket: process.env.AWS_S3_BUCKET,
       region: 's3-eu-west-2',
@@ -63,11 +55,7 @@ router.get('/', cors(corsOptions), function (req, res, next) {
   var hash = crypto.createHmac('sha1', process.env.AWS_SECRET_KEY);
   s3Config.signature = new Buffer.from(hash.update(s3Config.policy).digest()).toString('base64');
 
-  // var s3Hash = FroalaEditor.S3.getHash(configs);
   res.json(s3Config);
-  // res.json([
-  //   {id:1, username: "peep"}
-  // ])
 });
 
 module.exports = router;

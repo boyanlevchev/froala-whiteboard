@@ -32,18 +32,18 @@ class Canvas extends Component {
   }
 
   componentDidMount() {
-    fetch('http://localhost:3001/api/get_signature').then(res => res.json()).then( res => {
-      this.setState({secondClick: res})
-    })
-    // fetch('https://froala-whiteboard.herokuapp.com/api/get_signature').then(res => res.json()).then( res => {
+    // fetch('http://localhost:3001/api/get_signature').then(res => res.json()).then( res => {
     //   this.setState({secondClick: res})
     // })
-    fetch('http://localhost:3001/api/get_frofro').then(res => res.text()).then( res => {
-      this.setState({styling: res})
+    fetch('https://froala-whiteboard.herokuapp.com/api/get_signature').then(res => res.json()).then( res => {
+      this.setState({secondClick: res})
     })
-    // fetch('https://froala-whiteboard.herokuapp.com/api/get_frofro').then(res => res.text()).then( res => {
+    // fetch('http://localhost:3001/api/get_frofro').then(res => res.text()).then( res => {
     //   this.setState({styling: res})
     // })
+    fetch('https://froala-whiteboard.herokuapp.com/api/get_frofro').then(res => res.text()).then( res => {
+      this.setState({styling: res})
+    })
     this.props.fetchEditors(this.props.path.substring(1))
     this.props.fetchUpdates(this.props.path.substring(1))
   }

@@ -4,8 +4,6 @@ import { connect } from 'react-redux';
 
 import { selectEditor, setDragging, setCanvasDraggable, addEditor, updateEditor, fetchEditors, fetchUpdates } from '../actions'
 
-// import { froalaBanner } from '../javascript/on_load';
-
 import Editor from '../components/froala'
 import {SketchField, Tools} from 'react-sketch';
 
@@ -13,8 +11,11 @@ class Canvas extends Component {
   constructor(props) {
     super(props);
 
+    // Below we set the initial Redux prop for setCanvasDraggable to false.
+    // This means that no items on the whiteboard can be dragged (this is toggled later by pressing 'CMD' button)
     this.props.setCanvasDraggable(false);
 
+    //We create a React ref to the sketchfield, which allows us to capture the initial instance of the sketchfield to manipulate
     this.sketchField = React.createRef();
 
     this.state = {
@@ -32,22 +33,21 @@ class Canvas extends Component {
   }
 
   componentDidMount() {
-    // fetch('http://localhost:3001/api/get_signature').then(res => res.json()).then( res => {
-    //   this.setState({secondClick: res})
-    // })
+    //When component mounts, we make a call to the backend to retrieve a signature for communicating with S3
     fetch('https://froala-whiteboard.herokuapp.com/api/get_signature').then(res => res.json()).then( res => {
       this.setState({secondClick: res})
     })
-    // fetch('http://localhost:3001/api/get_frofro').then(res => res.text()).then( res => {
-    //   this.setState({styling: res})
-    // })
     fetch('https://froala-whiteboard.herokuapp.com/api/get_frofro').then(res => res.text()).then( res => {
       this.setState({styling: res})
     })
+    //When component mounts, we make call the Redux function that retrieves items in database and begins to listen for changes
     this.props.fetchEditors(this.props.path.substring(1))
     this.props.fetchUpdates(this.props.path.substring(1))
   }
 
+  // A lot of confusing if statements below which essentially redirect prop and state cahnges to the correct place
+  // In addition to redirecting retrieved information from the database
+  // Might be better to rewrite these as UseEffect react hooks, so as to listen for specific prop and state changes
   componentDidUpdate(prevProps) {
     if (this.props.localUpdatedEditor && (prevProps.localUpdatedEditor !== this.props.localUpdatedEditor)) {
       const key = Object.keys(this.props.localUpdatedEditor)[0]
@@ -127,7 +127,7 @@ class Canvas extends Component {
       }
     }
 
-    //Send updated sketchfield to databse, and change state reflecting change
+    //Send updated sketchfield to database, and change state reflecting change
     if (this.sketchField.current && (this.state.lastRef.length < this.sketchField.current.toJSON().objects.length)) {
       const pathAndKey = `${this.props.path}/sketchfield`
       this.props.updateEditor({[pathAndKey]: JSON.stringify(this.sketchField.current)})
@@ -139,10 +139,12 @@ class Canvas extends Component {
   }
 
   handleKeyDown = (event) => {
+    // if the key down is either left or right-hand command key, the canvas is set to draggable, meaning items can be dragged now
     if ( event.keyCode === 91 || event.keyCode === 93 ){
       document.documentElement.style.cursor = "grab";
       this.props.setCanvasDraggable(true);
     }
+    //if the keycode of the pressed key belongs to the 'alt/option' button, the cursor changes into a crosshair, and allows you to doodle on the canvas
     if ( event.keyCode === 18 ){
       this.setState({
         drawable: true
@@ -151,6 +153,7 @@ class Canvas extends Component {
   }
 
   handleKeyUp = (event) => {
+    //if keyup, then reset drawing and dragging back to false, meaning you can't draw or drag
     if ( event.keyCode === 91 || event.keyCode === 93 ){
       document.documentElement.style.cursor = "default";
       this.props.setCanvasDraggable(false);

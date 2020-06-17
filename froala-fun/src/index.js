@@ -18,6 +18,7 @@ import deleteEditorReducer from './reducers/delete_editor_reducer'
 import fetchUpdateReducer from './reducers/fetch_update_reducer'
 import updateEditorLocallyReducer from './reducers/update_editor_locally_reducer'
 
+// Redux reducers are combined to be passed into story
 const reducers = combineReducers({
   selectedEditor: selectedEditorReducer,
   draggableEditor: setDraggingReducer,
@@ -28,6 +29,7 @@ const reducers = combineReducers({
   localUpdatedEditor: updateEditorLocallyReducer
 });
 
+// Below we render the app and wrap it in Redux provider
 ReactDOM.render(
   <Provider store={createStore(reducers, {}, applyMiddleware(reduxThunk))}>
     <App />

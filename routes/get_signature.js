@@ -10,7 +10,11 @@ var allowedOrigins = [
                       'http://floopshoop.wpcomstaging.com/contact/',
                       'https://floopshoop.wpcomstaging.com/contact/',
                       'http://floopshoop.wpcomstaging.com/',
-                      'https://floopshoop.wpcomstaging.com'
+                      'https://floopshoop.wpcomstaging.com',
+                      'http://froala.com/',
+                      'https://froala.com/',
+                      'http://froala.com/wysiwyg-editor/whiteboard/',
+                      'https://froala.com/wysiwyg-editor/whiteboard/'
                       ]
 
 var corsOptions = {

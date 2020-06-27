@@ -23,6 +23,20 @@ export function setCanvasDraggable(boolean) {
   }
 }
 
+export function setDragnDropButtonActive(boolean) {
+  return {
+    type: 'DRAG_N_DROP_BUTTON_ACTIVE',
+    payload: boolean
+  }
+}
+
+export function setCanvasDrawable(boolean) {
+  return {
+    type: 'SET_CANVAS_DRAWABLE',
+    payload: boolean
+  }
+}
+
 export function updateEditorLocally(editor) {
   return {
     type: 'UPDATE_EDITOR_LOCALLY',
@@ -30,6 +44,24 @@ export function updateEditorLocally(editor) {
   }
   // console.log("this shit got updated yo")
 };
+
+export function resetWhiteboard(boolean) {
+  return {
+    type: 'RESET_WHITEBOARD',
+    payload: boolean
+  }
+}
+
+export function resetRedux(boolean) {
+  return {
+    type: 'RESET_REDUX',
+    payload: boolean
+  }
+}
+
+// .....
+// Firebase
+// .....
 
 export const addEditor = (newEditor) => async dispatch => {
   database.ref().update(newEditor);
@@ -69,25 +101,47 @@ export const fetchEditors = (canvas) => async dispatch => {
 };
 
 export const fetchUpdates = (canvas) => async dispatch => {
-  // console.log(`this is the canvas path: ${canvas}`)
+
   database.ref(canvas).on("child_added", function(data) {
     if (initialDataLoaded) {
-      console.log("child added")
+      console.log("child added", data.key, data.val())
       dispatch({
         type: 'FETCH_UPDATE',
         payload: {key: data.key, val: data.val()}
       });
     }
   });
+  database.ref(`${canvas}/editors`).on("child_added", function(data) {
+    if (initialDataLoaded) {
+      console.log("child editor added", data.key, data.val())
+      dispatch({
+        type: 'FETCH_UPDATE',
+        payload: {editors: {key: data.key, val: data.val()}}
+      });
+    }
+  });
+
   database.ref(canvas).on("child_changed", function(data) {
-    console.log("child changed")
+    if (data.key !== "editors") {
+      // console.log("child changed", data.key)
+      dispatch({
+        type: 'FETCH_UPDATE',
+        payload: {key: data.key, val: data.val()}
+      });
+    }
+  });
+
+  database.ref(`${canvas}/editors`).on("child_changed", function(data) {
+    console.log(canvas, "ref")
+    console.log("child changed", data.key)
     dispatch({
       type: 'FETCH_UPDATE',
-      payload: {key: data.key, val: data.val()}
+      payload: {editors: {key: data.key, val: data.val()}}
     });
   });
-  database.ref(canvas).on("child_removed", function(data) {
-    // console.log("child removed")
+
+  database.ref(`${canvas}/editors`).on("child_removed", function(data) {
+    console.log("child removed")
     dispatch({
       type: 'FETCH_UPDATE',
       payload: {childDeleted: {key: data.key, val: data.val()}}

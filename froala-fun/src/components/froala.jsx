@@ -85,45 +85,42 @@ class Editor extends Component {
     }
   }
 
-  // static getDerivedStateFromProps(props, current_state) {
-  //   if (current_state.model !== props.html) {
-  //     return {
-  //       model: props.html
-  //     }
-  //   }
-  //   return null
-  // }
-
-  componentDidUpdate(prevProps){
-    if ((prevProps.html)&&(this.state.model === prevProps.html)) {
-      return
-    } else if ((prevProps.html !== this.props.html) && (this.state.model !== this.props.html)){
-      console.log('2',this.state.model)
-      console.log('3',prevProps.html)
-      console.log('4',this.props.html)
-      console.log("this has triggered")
+  componentDidUpdate(prevProps, prevState){
+    if ((prevProps.html !== this.props.html) && (this.state.model !== this.props.html)){
       this.setState({
         model: this.props.html
-      })
+      }, () => {
+      this.handleToolbarUpdateViaProps(prevProps);
+    });
+
+    }
+  }
+
+  handleMouseOver = (e) => {
+    if (e.target.tagName === 'IFRAME' && this.props.canvasDraggable) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false
     }
   }
 
   handleClick = (e) => {
     this.props.selectEditor(this.props.id)
+    if (this.props.canvasDraggable){
+      e.preventDefault()
+    }
   }
 
   handleMouseDown = (event) => {
     this.props.selectEditor(this.props.id)
-    const yOffset = (event.clientY-this.props.y)
-    const xOffset = (event.clientX-this.props.x)
-    // console.log("props.y", this.props.y)
-    // console.log("props.x", this.props.x)
-    // console.log("the x event", event.clientX)
-    // console.log("the y event", event.clientY)
-    // console.log("xoffset:", xOffset)
-    // console.log("yoffset:", yOffset)
-    if (xOffset && yOffset){
-      this.props.setDragging({key: this.props.id, yOffset: yOffset, xOffset: xOffset})
+    if (this.props.canvasDraggable || this.props.dragnDropButtonActive) {
+      event.preventDefault()
+      console.log("canvas draggable", this.props.canvasDraggable)
+      const yOffset = (event.clientY-this.props.y)
+      const xOffset = (event.clientX-this.props.x)
+      if (xOffset && yOffset){
+        this.props.setDragging({key: this.props.id, yOffset: yOffset, xOffset: xOffset})
+      }
     }
   }
 
@@ -133,9 +130,11 @@ class Editor extends Component {
   }
 
   handleModelChange = function(model) {
-    const htmlPath = `${this.props.canvasPath}/${this.props.id}/html`
+    const htmlPath = `${this.props.canvasPath}/editors/${this.props.id}/html`
     const x = this.props.x
     const y = this.props.y
+
+    console.log("model changed")
 
     if ((this.state.model === "" && model !== "") || (this.state.model !== "" && model === "")) {
       if (this.initControls) {
@@ -146,11 +145,13 @@ class Editor extends Component {
         })
         this.initControls.initialize()
         const editor = this.initControls.getEditor()
+
         setTimeout(function(){
           editor.events.focus();
           editor.selection.setAtEnd(editor.$el.get(0));
           editor.selection.restore();
-        }, 100);
+          editor.toolbar.enable()
+        }, 10);
       }
     } else {
       this.setState({
@@ -162,12 +163,34 @@ class Editor extends Component {
     this.props.updateEditor({[htmlPath]: model})
   }
 
+  handleToolbarUpdateViaProps = function(prevProps) {
+    if ((prevProps.html === "" && this.props.html !== "") || (prevProps.html !== "" && this.props.html === "")) {
+      if (this.initControls) {
+        console.log("toolbar updated thru props", this.state.model)
+        this.initControls.destroy();
+        this.initControls.initialize()
+        const editor = this.initControls.getEditor()
+
+        setTimeout(function(){
+          editor.events.focus();
+          editor.selection.setAtEnd(editor.$el.get(0));
+          editor.selection.restore();
+          // editor.toolbar.enable()
+        }, 10);
+      }
+    }
+  }
+
   render() {
     var self = this;
     let editorClass = "editor"
 
+    if (this.props.canvasDraggable || this.props.canvasDrawable) {
+      editorClass = editorClass + " inner-content-unclickable"
+    }
+
     if (this.props.selectedEditor === this.props.id) {
-      editorClass = "editor selected-editor"
+      editorClass = editorClass + " selected-editor"
     }
 
     let style = {
@@ -184,7 +207,7 @@ class Editor extends Component {
       undo: true,
       refreshAfterCallback: false,
       callback: function() {
-        const htmlPath = `${self.props.canvasPath}/${this.itemId}`
+        const htmlPath = `${self.props.canvasPath}/editors/${this.itemId}`
         this.toolbar.hide()
         self.props.deleteEditor(htmlPath);
       }
@@ -194,24 +217,29 @@ class Editor extends Component {
       events: {
         'initialized': function() {
           this["itemId"] = self.props.id;
-          // console.log("initialized")
-          // self.codoxInitialized(this)
         },
         'click': function(e)  {
           self.handleClick(e);
           self.props.setDragging(null);
         },
-        'mousedown': (e) => {
-          this.handleMouseDown(e);
+        'mousedown': function(e) {
+          console.log("clicked")
+          if (self.props.canvasDraggable) {
+            console.log("clicked while draggable")
+            e.preventDefault();
+            return false;
+          }
+          self.handleMouseDown(e);
         },
-        'keydown': (e) => {
+        'keydown': function(e){
           if ( e.keyCode === 91 || e.keyCode === 93 ){
-            this.props.setCanvasDraggable(true);
+            self.props.setCanvasDraggable(true);
           }
         },
-        'keyup': (e) => {
+        'keyup': function(e) {
           if ( e.keyCode === 91 || e.keyCode === 93 ){
-            this.props.setCanvasDraggable(false);
+            // this.$el[0].style.pointerEvents = 'auto'
+            self.props.setCanvasDraggable(false);
           }
         }
       },
@@ -234,6 +262,7 @@ class Editor extends Component {
         id={this.props.id}
         onClick={this.handleClick}
         onMouseDown={this.handleMouseDown}
+        onMouseOver={this.handleMouseOver}
       >
         <FroalaEditor
           config={config}
@@ -263,7 +292,9 @@ function mapReduxStateToProps(reduxState) {
   return {
     selectedEditor: reduxState.selectedEditor,
     canvasDraggable: reduxState.canvasDraggable,
-    localUpdatedEditor: reduxState.localUpdatedEditor
+    canvasDrawable: reduxState.canvasDrawable,
+    localUpdatedEditor: reduxState.localUpdatedEditor,
+    dragnDropButtonActive: reduxState.dragnDropButtonActive
   }
 }
 

@@ -1,5 +1,11 @@
+.editor {
+  transition: 0.15s;
+  padding-bottom: 12px;
+}
+
 .selected-editor{
-  outline: 1px dashed black;
+  /*outline: 3px solid #f94144BF;*/
+  box-shadow: 2pt 6pt 10pt 1pt rgba(230,230,230,0.4);
 }
 
 .fr-element {
@@ -10,3 +16,6 @@
   /*{add here the css method for displacing content}*/
 }
 
+.inner-content-unclickable > div {
+  pointer-events: none;
+}

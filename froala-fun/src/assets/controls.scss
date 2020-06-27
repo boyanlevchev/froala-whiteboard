@@ -1,0 +1,99 @@
+.tools {
+  border: 3px solid #0599F7;
+  border-radius: 50%;
+  padding: 10px 14px;
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  color: #0599F7;
+  margin: 3px auto 3px auto;
+  transition: 0.2s;
+}
+
+
+.finalTool {
+  margin-bottom: 60px;
+}
+
+#penButton:hover{
+  background-color: #06d6a0;
+  border-color: #06d6a0;
+  color: white;
+}
+
+.penButtonActive {
+  background-color: #06d6a0;
+  border-color: #06d6a0;
+  color: white;
+}
+
+#dragnDropButton:hover{
+  background-color: #ffa62b;
+  border-color: #ffa62b;
+  color: white;
+}
+.dragnDropButtonActive{
+  background-color: #ffa62b;
+  border-color: #ffa62b;
+  color: white;
+}
+
+#clearWhiteboardButton:hover{
+  background-color: #ff595e;
+  border-color: #ff595e;
+  color: white;
+}
+
+
+.toolsExpand {
+  -webkit-animation: rotate-135-cw 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+          animation: rotate-135-cw 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+@-webkit-keyframes rotate-135-cw {
+  0% {
+    -webkit-transform: rotate(0);
+            transform: rotate(0);
+  }
+  100% {
+    -webkit-transform: rotate(135deg);
+            transform: rotate(135deg);
+  }
+}
+@keyframes rotate-135-cw {
+  0% {
+    -webkit-transform: rotate(0);
+            transform: rotate(0);
+  }
+  100% {
+    -webkit-transform: rotate(135deg);
+            transform: rotate(135deg);
+  }
+}
+
+.toolsContract {
+
+  -webkit-animation: rotate-135-ccw 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+          animation: rotate-135-ccw 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
+@-webkit-keyframes rotate-135-ccw {
+  0% {
+    -webkit-transform: rotate(45deg);
+            transform: rotate(45deg);
+  }
+  100% {
+    -webkit-transform: rotate(-90deg);
+            transform: rotate(-90deg);
+  }
+}
+@keyframes rotate-135-ccw {
+  0% {
+    -webkit-transform: rotate(45deg);
+            transform: rotate(45deg);
+  }
+  100% {
+    -webkit-transform: rotate(-90deg);
+            transform: rotate(-90deg);
+  }
+}
+

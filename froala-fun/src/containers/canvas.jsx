@@ -2,9 +2,10 @@ import React, { Component } from 'react'
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
-import { selectEditor, setDragging, setCanvasDraggable, addEditor, updateEditor, fetchEditors, fetchUpdates } from '../actions'
+import { selectEditor, setDragging, setCanvasDraggable, addEditor, updateEditor, fetchEditors, fetchUpdates, deleteEditor, resetRedux } from '../actions'
 
 import Editor from '../components/froala'
+import Controls from '../components/controls'
 import {SketchField, Tools} from 'react-sketch';
 
 class Canvas extends Component {
@@ -26,6 +27,8 @@ class Canvas extends Component {
       currentSketchField: "",
       lastRef: [],
       fetchedSketchfield: {},
+      initialFetch: false,
+      clearingBoard: false,
       secondClick: {},
       styling: "",
       mediaCounter: 0
@@ -49,12 +52,19 @@ class Canvas extends Component {
   // In addition to redirecting retrieved information from the database
   // Might be better to rewrite these as UseEffect react hooks, so as to listen for specific prop and state changes
   componentDidUpdate(prevProps) {
+    // console.log(this.state)
+
     if (this.props.localUpdatedEditor && (prevProps.localUpdatedEditor !== this.props.localUpdatedEditor)) {
+
       const key = Object.keys(this.props.localUpdatedEditor)[0]
+      console.log("locally updated shiz", this.props.localUpdatedEditor[key]['html'])
+      const x = this.state.editorComponents[key]['x']
+      const y = this.state.editorComponents[key]['y']
+      const html = this.props.localUpdatedEditor[key]['html']
       this.setState(prevState => ({
             editorComponents: {
                 ...prevState.editorComponents,
-                [key]: {html: this.props.localUpdatedEditor[key]['html']}
+                [key]: {html: html, x: x, y: y}
             }
           }))
     }
@@ -63,61 +73,92 @@ class Canvas extends Component {
     if (this.props.fetchedEditors
       && this.state.editorComponents
       && this.state.fetchedSketchfield
-      && (Object.keys(this.state.editorComponents).length === 0 && Object.keys(this.state.fetchedSketchfield).length === 0)) {
-      const { sketchfield, ...nonSketchfield } = this.props.fetchedEditors;
-      const { editorID, ...editors} = nonSketchfield
+      && (Object.keys(this.state.editorComponents).length === 0 && Object.keys(this.state.fetchedSketchfield).length === 0)
+      && this.state.initialFetch === false) {
+      console.log("fetched")
+      console.log(this.props.fetchedEditors, "fetched editors")
+      // const { sketchfield, ...nonSketchfield } = this.props.fetchedEditors; //(would be good to remember this trick - good for "popping" key/values from objects - really just creates a new object with ...item, and a lone item from the item on the left) Is not necessary anymore for purposes
+      const sketchfield = (this.props.fetchedEditors.sketchfield ? this.props.fetchedEditors.sketchfield : {});
+      const editorID = (this.props.fetchedEditors.editorID ? this.props.fetchedEditors.editorID : 0 )
+      const editors = (this.props.fetchedEditors.editors ? this.props.fetchedEditors.editors : {})
+      const lastRef = (this.props.fetchedEditors.sketchfield ? JSON.parse(sketchfield).objects : [])
         this.setState({
           editorIDs: editorID,
           editorComponents: editors,
-          fetchedSketchfield: sketchfield
+          fetchedSketchfield: sketchfield,
+          lastRef: lastRef,
+          initialFetch: true
         })
     }
 
     //Delete editor from screen
     if (this.props.deletedEditorId in this.state.editorComponents) {
+
       this.handleDelete();
     }
 
     //Fetch updates
-    if (prevProps.fetchedUpdate !== this.props.fetchedUpdate) {
+    if (prevProps.fetchedUpdate !== this.props.fetchedUpdate && this.props.fetchedUpdate !== null ) {
+
+
       if (!this.props.fetchedUpdate.childDeleted) {
         const key = this.props.fetchedUpdate.key;
+
+        //updates the sketchfield with other users' updates
         if (key === "sketchfield") {
+          console.log("passes through here")
+          console.log(key, "key", this.props.fetchedUpdate.val, "val")
           this.setState(prevState => ({
             fetchedSketchfield: this.props.fetchedUpdate.val,
             currentSketchField: this.props.fetchedUpdate.val,
             lastRef: JSON.parse(this.props.fetchedUpdate.val).objects
           }))
+
+        //this one updates the the editor ID locally, and ensures that every session will create a new editor with the correct
+        //ID - gradually incrementing it
         } else if (key === "editorID") {
           this.setState({
             editorIDs: this.props.fetchedUpdate.val
           })
-        } else if (key !== "sketchfield" && key !== "editorID") {
-          if (!this.state.editorComponents[key]) {
+
+        //resets the whiteboard for all users
+        } else if (key === "confirmclear" && this.props.fetchedUpdate.val) {
+          this.handleClearWhiteboard()
+
+        } else if (this.props.fetchedUpdate.editors) {
+
+          const editors = this.props.fetchedUpdate.editors
+          console.log(editors.key, "key", editors.val, "val")
+
+          //if it is an entirely new editor added by someone else i.e. the key doesn't exist yet locally
+          if (!this.state.editorComponents[editors.key]) {
             this.setState(prevState => ({
               editorComponents: {
                   ...prevState.editorComponents,
-                  [key]: this.props.fetchedUpdate.val
+                  [editors.key]: editors.val
               }
             }))
-          } else if ((this.state.editorComponents[key]["html"] !== this.props.fetchedUpdate.val["html"])) {
+          } else if ((this.state.editorComponents[editors.key]["html"] !== editors.val["html"])) {
             this.setState(prevState => ({
               editorComponents: {
                   ...prevState.editorComponents,
-                  [key]: this.props.fetchedUpdate.val
+                  [editors.key]: editors.val
               }
             }))
-          } else if ((this.state.editorComponents[key]['x']!== this.props.fetchedUpdate.val['x'])
-            || (this.state.editorComponents[key]['y']!== this.props.fetchedUpdate.val['y'])) {
+          } else if ((this.state.editorComponents[editors.key]['x']!== editors.val['x'])
+            || (this.state.editorComponents[editors.key]['y']!== editors.val['y'])) {
             this.setState(prevState => ({
               editorComponents: {
                   ...prevState.editorComponents,
-                  [key]: {x: this.props.fetchedUpdate.val['x'], y: this.props.fetchedUpdate.val['y']}
+                  [editors.key]: {x: editors.val['x'], y: editors.val['y']}
               }
             }))
+          } else {
+            console.log("child changed, but updated nowhere")
           }
         }
       } else if (this.props.fetchedUpdate.childDeleted){
+        console.log(this.props.fetchedUpdate.childDeleted, "deleted object")
         let newEditorComponents = this.state.editorComponents
 
         delete newEditorComponents[this.props.fetchedUpdate.childDeleted.key]
@@ -128,7 +169,14 @@ class Canvas extends Component {
     }
 
     //Send updated sketchfield to database, and change state reflecting change
-    if (this.sketchField.current && (this.state.lastRef.length < this.sketchField.current.toJSON().objects.length)) {
+    if (this.sketchField.current
+      && (this.state.lastRef.length < this.sketchField.current.toJSON().objects.length)
+      && !this.state.clearingBoard) {
+      console.log("i think something is happening in here")
+      console.log(this.state.lastRef.length, "< ? ", this.sketchField.current.toJSON().objects.length)
+      console.log(this.sketchField.current.toJSON(), "current sketchfield ref")
+      console.log(this.state.currentSketchField, "current state sketchfield")
+      console.log(this.state.fetchedSketchfield, "fetched sketchfield")
       const pathAndKey = `${this.props.path}/sketchfield`
       this.props.updateEditor({[pathAndKey]: JSON.stringify(this.sketchField.current)})
       this.setState({
@@ -154,7 +202,7 @@ class Canvas extends Component {
 
   handleKeyUp = (event) => {
     //if keyup, then reset drawing and dragging back to false, meaning you can't draw or drag
-    if ( event.keyCode === 91 || event.keyCode === 93 ){
+    if ( (event.keyCode === 91 || event.keyCode === 93) && !this.props.dragnDropButtonActive ){
       document.documentElement.style.cursor = "default";
       this.props.setCanvasDraggable(false);
     }
@@ -166,6 +214,7 @@ class Canvas extends Component {
   }
 
   handleClick = (event) => {
+
     if (event.target.id === "canvas"){
       this.props.selectEditor(null)
     }
@@ -183,12 +232,15 @@ class Canvas extends Component {
   }
 
   doubleClick = (event) => {
-    if (event.target.id === "canvas" && this.props.canvasDraggable === false){
+  // console.log("double click", this.props)
+    if (event.target.id === "canvas" && this.props.canvasDraggable === false && !this.props.dragnDropButtonActive){
+      console.log("is this one funky?")
       const x = event.clientX
       const y = (event.clientY - 60)
       if ( this.state.editorIDs === 0) {
+        console.log("just checking")
         const key = `editor0`
-        const pathAndKey = `${this.props.path}/${key}`
+        const pathAndKey = `${this.props.path}/editors/${key}`
         const pathAndEditorID = `${this.props.path}/editorID`
         this.setState({
           editorIDs: 1,
@@ -197,9 +249,10 @@ class Canvas extends Component {
         this.props.selectEditor(key)
         this.props.addEditor({[pathAndKey]: {html: "", x:x, y:y}, [pathAndEditorID]: 1})
       } else {
+        console.log("just checking other one...", this.state.editorIDs)
         let id = (this.state.editorIDs)
         let key = `editor${id}`
-        const pathAndKey = `${this.props.path}/${key}`
+        const pathAndKey = `${this.props.path}/editors/${key}`
         this.setState(prevState => ({
           editorIDs: (id + 1),
           editorComponents: {
@@ -218,20 +271,21 @@ class Canvas extends Component {
 
   handleMouseMove = (event) => {
 
-    if(this.props.draggableEditor !== null && this.props.canvasDraggable === true){
+    if(this.props.draggableEditor !== null && (this.props.canvasDraggable === true || this.props.dragnDropButtonActive === true)){
 
       let key = this.props.draggableEditor.key
+      const html = this.state.editorComponents[key].html
       const x = (event.clientX - this.props.draggableEditor.xOffset)
       const y = (event.clientY - this.props.draggableEditor.yOffset)
       if (x && y){
         this.setState(prevState => ({
             editorComponents: {
                 ...prevState.editorComponents,
-                [key]: {x:x, y:y}
+                [key]: {html: html, x:x, y:y}
             }
           }))
-        const xPath = `${this.props.path}/${key}/x`
-        const yPath = `${this.props.path}/${key}/y`
+        const xPath = `${this.props.path}/editors/${key}/x`
+        const yPath = `${this.props.path}/editors/${key}/y`
         this.props.updateEditor({[xPath]:x, [yPath]:y})
       }
     }
@@ -250,43 +304,59 @@ class Canvas extends Component {
     })
   }
 
+  handleClearWhiteboard = () => {
+    //delete all content up in the cloud
+    //delete all content locally - editor Ids and editocompoenents and draw tool
+    const pathname = this.props.path + '/editors/'
+    const editorIDpath = this.props.path + '/editorID'
+    const sketchfieldPath = this.props.path + '/sketchfield'
+    const confirmationPathAndKey = this.props.path +'/confirmclear'
+
+    // console.log(pathname)
+
+
+    this.setState({
+      editorComponents: {},
+      editorIDs: 0,
+      currentSketchField: "",
+      lastRef: [],
+      fetchedSketchfield: {},
+      clearingBoard: true
+    }, () => {
+      this.props.deleteEditor(pathname);
+      this.props.deleteEditor(editorIDpath);
+      this.props.deleteEditor(sketchfieldPath);
+      this.props.updateEditor({[confirmationPathAndKey]: false});
+      this.props.resetRedux();
+      document.documentElement.style.cursor = "default";
+      //having the clearingBoard state allows us to stop certain updates that should not happen before everything has been cleared off the board
+      //it allows us to quickly destroy and reinitialize the sketchpad, which solves some annoying problems where it wouldn't want to delete locally
+      //due to a mismatch between the state and the ref of the sketchpad
+      this.setState({
+        clearingBoard: false
+      })
+    })
+  }
+
   render(){
     let placeholderClass = "canvas-placeholder-visible"
     let sketchFieldClass = "sketchField sketchFieldInactive"
+    let SketchFieldHolder
 
-    if (Object.keys(this.state.editorComponents).length > 0){
+    // console.log(this.state.fetchedSketchfield, "fetched sketchfield")
+    // if(this.sketchField.current){console.log(this.sketchField.current.toJSON(), "current sketchfield")}
+    // console.log(this.state.lastRef, "last ref")
+
+    if (Object.keys(this.state.editorComponents).length > 0 || this.state.lastRef.length > 0){
       placeholderClass = "canvas-placeholder-hidden"
     } else {
       placeholderClass = "canvas-placeholder-visible"
     }
-    if (this.state.drawable === true){
+    if (this.state.drawable === true || this.props.canvasDrawable === true){
       sketchFieldClass = "sketchField"
     }
-
-    return(
-          <div>
-            <div id="canvas-header">
-              <h1>Froala Whiteboard</h1>
-            </div>
-            <div
-              id="canvas"
-              onClick={this.handleClick}
-              onKeyDown={this.handleKeyDown}
-              onKeyUp={this.handleKeyUp}
-              onMouseMove={this.handleMouseMove}
-              onMouseUp={this.handleMouseUp}
-              tabIndex="0"
-            >
-              <div id="canvas-placeholder">
-                <h3 className={placeholderClass} >Double-click anywhere to begin...</h3>
-              </div>
-              <div id="controls">
-                <p>{this.state.test}</p>
-                <p>Hold 'cmd' to drag items</p>
-                <p>Hold 'alt' to draw</p>
-              </div>
-              <div className={sketchFieldClass} onKeyDown={this.handleKeyDown}>
-                <SketchField  width='1500px'
+    if (!this.state.clearingBoard) {
+      SketchFieldHolder = <SketchField  width='1500px'
                               height='800px'
                               tool={Tools.Pencil}
                               lineColor='black'
@@ -295,6 +365,35 @@ class Canvas extends Component {
                               value={this.state.fetchedSketchfield}
                               ref={this.sketchField}
                               />
+    }
+
+    return(
+          <div
+          onKeyDown={this.handleKeyDown}
+          onKeyUp={this.handleKeyUp}
+          >
+            <div id="canvas-header">
+              <a href="https://www.froala.com"><img id="froala-logo" src="FroalaLogo.png" alt="Froala Logo - return to home page button"/></a>
+              <h1> Whiteboard </h1>
+            </div>
+            <div id="controls">
+              <Controls path={this.props.path}/>
+              {/*<p>Hold 'cmd' to drag items</p>
+                              <p>Hold 'alt' to draw</p>
+                              <p onClick={this.handleClearWhiteboard} class="clear-button">Clear Whiteboard</p>*/}
+            </div>
+            <div
+              id="canvas"
+              onClick={this.handleClick}
+              onMouseMove={this.handleMouseMove}
+              onMouseUp={this.handleMouseUp}
+              tabIndex="0"
+            >
+              <div id="canvas-placeholder">
+                <h3 className={placeholderClass} >Double-click anywhere to begin...</h3>
+              </div>
+              <div className={sketchFieldClass}>
+                {SketchFieldHolder}
 
               </div>
               {Object.keys(this.state.editorComponents).map( editor => {
@@ -322,7 +421,9 @@ function mapDispatchToProps(dispatch) {
     addEditor: addEditor,
     updateEditor: updateEditor,
     fetchEditors: fetchEditors,
-    fetchUpdates: fetchUpdates
+    fetchUpdates: fetchUpdates,
+    deleteEditor: deleteEditor,
+    resetRedux: resetRedux
   },
     dispatch
   );
@@ -333,10 +434,13 @@ function mapReduxStateToProps(reduxState) {
     selectedEditor: reduxState.selectedEditor,
     draggableEditor: reduxState.draggableEditor,
     canvasDraggable: reduxState.canvasDraggable,
+    canvasDrawable: reduxState.canvasDrawable,
     deletedEditorId: reduxState.deletedEditorId,
     fetchedEditors: reduxState.fetchedEditors,
     fetchedUpdate: reduxState.fetchedUpdate,
-    localUpdatedEditor: reduxState.localUpdatedEditor
+    localUpdatedEditor: reduxState.localUpdatedEditor,
+    isWhiteboardReset: reduxState.isWhiteboardReset,
+    dragnDropButtonActive: reduxState.dragnDropButtonActive
   }
 }
 

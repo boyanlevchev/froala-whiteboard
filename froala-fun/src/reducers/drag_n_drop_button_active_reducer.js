@@ -1,14 +1,14 @@
-const setCanvasDraggable = (state, action) => {
+const dragnDropButtonActive = (state, action) => {
   //compute and return the new state
   if(state === undefined) {
     return false;
   }
 
-  if (action.type === 'SET_CANVAS_DRAGGABLE') {
+  if (action.type === 'DRAG_N_DROP_BUTTON_ACTIVE') {
     return action.payload;
   } else {
     return state;
   }
 }
 
-export default setCanvasDraggable;
+export default dragnDropButtonActive;

@@ -7,6 +7,8 @@ import {
 } from "react-router-dom";
 
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.css';
+
 
 import Canvas from './containers/canvas'
 

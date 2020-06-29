@@ -91,11 +91,19 @@ export const deleteEditor = deleteEditor => async dispatch => {
 export const fetchEditors = (canvas) => async dispatch => {
   console.log(`this is the canvas path: ${canvas}`)
   database.ref(canvas).once("value", snapshot => {
-    console.log("data fetched")
-    dispatch({
-      type: 'FETCH_EDITOR',
-      payload: snapshot.val()
-    });
+    // console.log("data fetched", snapshot.val())
+    if (snapshot.val()) {
+        dispatch({
+        type: 'FETCH_EDITOR',
+        payload: snapshot.val()
+      });
+    } else {
+        dispatch({
+        type: 'FETCH_EDITOR',
+        payload: "Nothing to fetch"
+      });
+    }
+
     initialDataLoaded = true;
   });
 };
@@ -132,8 +140,8 @@ export const fetchUpdates = (canvas) => async dispatch => {
   });
 
   database.ref(`${canvas}/editors`).on("child_changed", function(data) {
-    console.log(canvas, "ref")
-    console.log("child changed", data.key)
+    // console.log(canvas, "ref")
+    // console.log("child changed", data.key)
     dispatch({
       type: 'FETCH_UPDATE',
       payload: {editors: {key: data.key, val: data.val()}}

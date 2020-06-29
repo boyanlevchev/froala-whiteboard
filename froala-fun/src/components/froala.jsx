@@ -185,7 +185,7 @@ class Editor extends Component {
     var self = this;
     let editorClass = "editor"
 
-    if (this.props.canvasDraggable || this.props.canvasDrawable) {
+    if (this.props.canvasDraggable || this.props.canvasDrawable || this.props.dragnDropButtonActive) {
       editorClass = editorClass + " inner-content-unclickable"
     }
 

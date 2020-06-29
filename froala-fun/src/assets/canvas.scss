@@ -92,3 +92,45 @@
   border: 1px #e63946 solid;
   color: white;
 }
+
+.fadeoutLoader {
+  pointer-events: none;
+  -webkit-animation: swirl-out-fwd 0.65s ease-in both;
+            animation: swirl-out-fwd 0.65s ease-in both;
+}
+
+@-webkit-keyframes swirl-out-fwd {
+  0% {
+    -webkit-transform: rotate(0) scale(1);
+            transform: rotate(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: rotate(540deg) scale(5);
+            transform: rotate(540deg) scale(5);
+    opacity: 0;
+  }
+}
+@keyframes swirl-out-fwd {
+  0% {
+    -webkit-transform: rotate(0) scale(1);
+            transform: rotate(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: rotate(540deg) scale(5);
+            transform: rotate(540deg) scale(5);
+    opacity: 0;
+  }
+}
+
+.loaderDiv {
+  opacity: 1;
+  transition: 0.5s;
+}
+
+.fadeoutLoaderDiv {
+  pointer-events: none;
+  opacity: 0;
+  transition: 0.5s;
+}

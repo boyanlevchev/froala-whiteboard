@@ -52,12 +52,14 @@ class Canvas extends Component {
   // In addition to redirecting retrieved information from the database
   // Might be better to rewrite these as UseEffect react hooks, so as to listen for specific prop and state changes
   componentDidUpdate(prevProps) {
-    // console.log(this.state)
+    // if (this.props.fetchedEditors) {
+    //   console.log("fetched editors",this.props.fetchedEditors)
+    // }
 
     if (this.props.localUpdatedEditor && (prevProps.localUpdatedEditor !== this.props.localUpdatedEditor)) {
 
       const key = Object.keys(this.props.localUpdatedEditor)[0]
-      console.log("locally updated shiz", this.props.localUpdatedEditor[key]['html'])
+      // console.log("locally updated shiz", this.props.localUpdatedEditor[key]['html'])
       const x = this.state.editorComponents[key]['x']
       const y = this.state.editorComponents[key]['y']
       const html = this.props.localUpdatedEditor[key]['html']
@@ -75,8 +77,9 @@ class Canvas extends Component {
       && this.state.fetchedSketchfield
       && (Object.keys(this.state.editorComponents).length === 0 && Object.keys(this.state.fetchedSketchfield).length === 0)
       && this.state.initialFetch === false) {
-      console.log("fetched")
-      console.log(this.props.fetchedEditors, "fetched editors")
+
+      // console.log("fetched")
+      // console.log(this.props.fetchedEditors, "fetched editors")
       // const { sketchfield, ...nonSketchfield } = this.props.fetchedEditors; //(would be good to remember this trick - good for "popping" key/values from objects - really just creates a new object with ...item, and a lone item from the item on the left) Is not necessary anymore for purposes
       const sketchfield = (this.props.fetchedEditors.sketchfield ? this.props.fetchedEditors.sketchfield : {});
       const editorID = (this.props.fetchedEditors.editorID ? this.props.fetchedEditors.editorID : 0 )
@@ -106,8 +109,8 @@ class Canvas extends Component {
 
         //updates the sketchfield with other users' updates
         if (key === "sketchfield") {
-          console.log("passes through here")
-          console.log(key, "key", this.props.fetchedUpdate.val, "val")
+          // console.log("passes through here")
+          // console.log(key, "key", this.props.fetchedUpdate.val, "val")
           this.setState(prevState => ({
             fetchedSketchfield: this.props.fetchedUpdate.val,
             currentSketchField: this.props.fetchedUpdate.val,
@@ -128,7 +131,7 @@ class Canvas extends Component {
         } else if (this.props.fetchedUpdate.editors) {
 
           const editors = this.props.fetchedUpdate.editors
-          console.log(editors.key, "key", editors.val, "val")
+          // console.log(editors.key, "key", editors.val, "val")
 
           //if it is an entirely new editor added by someone else i.e. the key doesn't exist yet locally
           if (!this.state.editorComponents[editors.key]) {
@@ -154,11 +157,11 @@ class Canvas extends Component {
               }
             }))
           } else {
-            console.log("child changed, but updated nowhere")
+            // console.log("child changed, but updated nowhere")
           }
         }
       } else if (this.props.fetchedUpdate.childDeleted){
-        console.log(this.props.fetchedUpdate.childDeleted, "deleted object")
+        // console.log(this.props.fetchedUpdate.childDeleted, "deleted object")
         let newEditorComponents = this.state.editorComponents
 
         delete newEditorComponents[this.props.fetchedUpdate.childDeleted.key]
@@ -172,11 +175,11 @@ class Canvas extends Component {
     if (this.sketchField.current
       && (this.state.lastRef.length < this.sketchField.current.toJSON().objects.length)
       && !this.state.clearingBoard) {
-      console.log("i think something is happening in here")
-      console.log(this.state.lastRef.length, "< ? ", this.sketchField.current.toJSON().objects.length)
-      console.log(this.sketchField.current.toJSON(), "current sketchfield ref")
-      console.log(this.state.currentSketchField, "current state sketchfield")
-      console.log(this.state.fetchedSketchfield, "fetched sketchfield")
+      // console.log("i think something is happening in here")
+      // console.log(this.state.lastRef.length, "< ? ", this.sketchField.current.toJSON().objects.length)
+      // console.log(this.sketchField.current.toJSON(), "current sketchfield ref")
+      // console.log(this.state.currentSketchField, "current state sketchfield")
+      // console.log(this.state.fetchedSketchfield, "fetched sketchfield")
       const pathAndKey = `${this.props.path}/sketchfield`
       this.props.updateEditor({[pathAndKey]: JSON.stringify(this.sketchField.current)})
       this.setState({
@@ -234,11 +237,11 @@ class Canvas extends Component {
   doubleClick = (event) => {
   // console.log("double click", this.props)
     if (event.target.id === "canvas" && this.props.canvasDraggable === false && !this.props.dragnDropButtonActive){
-      console.log("is this one funky?")
+      // console.log("is this one funky?")
       const x = event.clientX
       const y = (event.clientY - 60)
       if ( this.state.editorIDs === 0) {
-        console.log("just checking")
+        // console.log("just checking")
         const key = `editor0`
         const pathAndKey = `${this.props.path}/editors/${key}`
         const pathAndEditorID = `${this.props.path}/editorID`
@@ -249,7 +252,7 @@ class Canvas extends Component {
         this.props.selectEditor(key)
         this.props.addEditor({[pathAndKey]: {html: "", x:x, y:y}, [pathAndEditorID]: 1})
       } else {
-        console.log("just checking other one...", this.state.editorIDs)
+        // console.log("just checking other one...", this.state.editorIDs)
         let id = (this.state.editorIDs)
         let key = `editor${id}`
         const pathAndKey = `${this.props.path}/editors/${key}`
@@ -342,6 +345,12 @@ class Canvas extends Component {
     let placeholderClass = "canvas-placeholder-visible"
     let sketchFieldClass = "sketchField sketchFieldInactive"
     let SketchFieldHolder
+    let loaderClass = ""
+    let loaderDivClass = "loaderDiv"
+
+    // if (this.props.fetchedEditors) {
+    //   console.log("fetched editors",this.props.fetchedEditors)
+    // }
 
     // console.log(this.state.fetchedSketchfield, "fetched sketchfield")
     // if(this.sketchField.current){console.log(this.sketchField.current.toJSON(), "current sketchfield")}
@@ -366,6 +375,10 @@ class Canvas extends Component {
                               ref={this.sketchField}
                               />
     }
+    if (this.state.initialFetch === true) {
+      loaderClass = "fadeoutLoader"
+      loaderDivClass = " fadeoutLoaderDiv"
+    }
 
     return(
           <div
@@ -375,6 +388,9 @@ class Canvas extends Component {
             <div id="canvas-header">
               <a href="https://www.froala.com"><img id="froala-logo" src="FroalaLogo.png" alt="Froala Logo - return to home page button"/></a>
               <h1> Whiteboard </h1>
+            </div>
+            <div className={loaderDivClass} style={{position: 'absolute', zIndex: '5', top: '0', left: '0', width: '100%', height: '100%', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+              <img className={loaderClass} style={{width: '100px', height: '100px', background: 'transparent', filter: 'hue-rotate(110deg) brightness(0.62) contrast(400%)'}} src="Cells-256px.gif" alt="loading bar"/>
             </div>
             <div id="controls">
               <Controls path={this.props.path}/>

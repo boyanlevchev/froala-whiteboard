@@ -77,7 +77,7 @@ export const updateEditor = updateEditor => async dispatch => {
 export const deleteEditor = deleteEditor => async dispatch => {
   database.ref().child(deleteEditor).remove(function(error){
     if (!error) {
-      console.log(`${deleteEditor} has been deleted online`)
+      // console.log(`${deleteEditor} has been deleted online`)
       dispatch( {
         type: 'DELETE_EDITOR',
         payload: deleteEditor.split('/').pop()
@@ -89,7 +89,7 @@ export const deleteEditor = deleteEditor => async dispatch => {
 };
 
 export const fetchEditors = (canvas) => async dispatch => {
-  console.log(`this is the canvas path: ${canvas}`)
+  // console.log(`this is the canvas path: ${canvas}`)
   database.ref(canvas).once("value", snapshot => {
     // console.log("data fetched", snapshot.val())
     if (snapshot.val()) {
@@ -112,7 +112,7 @@ export const fetchUpdates = (canvas) => async dispatch => {
 
   database.ref(canvas).on("child_added", function(data) {
     if (initialDataLoaded) {
-      console.log("child added", data.key, data.val())
+      // console.log("child added", data.key, data.val())
       dispatch({
         type: 'FETCH_UPDATE',
         payload: {key: data.key, val: data.val()}
@@ -121,7 +121,7 @@ export const fetchUpdates = (canvas) => async dispatch => {
   });
   database.ref(`${canvas}/editors`).on("child_added", function(data) {
     if (initialDataLoaded) {
-      console.log("child editor added", data.key, data.val())
+      // console.log("child editor added", data.key, data.val())
       dispatch({
         type: 'FETCH_UPDATE',
         payload: {editors: {key: data.key, val: data.val()}}
@@ -149,7 +149,7 @@ export const fetchUpdates = (canvas) => async dispatch => {
   });
 
   database.ref(`${canvas}/editors`).on("child_removed", function(data) {
-    console.log("child removed")
+    // console.log("child removed")
     dispatch({
       type: 'FETCH_UPDATE',
       payload: {childDeleted: {key: data.key, val: data.val()}}

@@ -223,7 +223,7 @@ class Editor extends Component {
           self.props.setDragging(null);
         },
         'mousedown': function(e) {
-          console.log("clicked")
+          // console.log("clicked")
           if (self.props.canvasDraggable) {
             console.log("clicked while draggable")
             e.preventDefault();

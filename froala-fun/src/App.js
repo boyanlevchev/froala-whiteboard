@@ -16,7 +16,7 @@ function App() {
   // Below we use React router to allow us to access location and history of current page (housed in <Switch>)
   // Then we render CanvasHolder, which holds the Canvas component, and calculates a unique URL
   return (
-    <Router>
+    <Router basename={'/wysiwyg-editor/whiteboard'}>
       <Switch>
         <CanvasHolder/>
       </Switch>

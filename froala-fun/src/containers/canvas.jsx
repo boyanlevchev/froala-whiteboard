@@ -37,12 +37,18 @@ class Canvas extends Component {
 
   componentDidMount() {
     //When component mounts, we make a call to the backend to retrieve a signature for communicating with S3
-    fetch('https://froala-whiteboard.herokuapp.com/api/get_signature').then(res => res.json()).then( res => {
+    fetch('/api/get_signature').then(res => res.json()).then( res => {
       this.setState({secondClick: res})
     })
-    fetch('https://froala-whiteboard.herokuapp.com/api/get_frofro').then(res => res.text()).then( res => {
+    fetch('/api/get_frofro').then(res => res.text()).then( res => {
       this.setState({styling: res})
     })
+    // fetch('https://froala-whiteboard.herokuapp.com/api/get_signature').then(res => res.json()).then( res => {
+    //   this.setState({secondClick: res})
+    // })
+    // fetch('https://froala-whiteboard.herokuapp.com/api/get_frofro').then(res => res.text()).then( res => {
+    //   this.setState({styling: res})
+    // })
     //When component mounts, we make call the Redux function that retrieves items in database and begins to listen for changes
     this.props.fetchEditors(this.props.path.substring(1))
     this.props.fetchUpdates(this.props.path.substring(1))

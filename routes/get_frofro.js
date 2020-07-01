@@ -4,16 +4,20 @@ var cors = require('cors');
 require('dotenv').config();
 
 var allowedOrigins = [
-                      'http://localhost:3000',
-                      'http://froala-whiteboard.herokuapp.com/',
-                      'https://froala-whiteboard.herokuapp.com/',
-                      'http://froala-whiteboard.herokuapp.com/wysiwyg-editor/whiteboard/',
-                      'https://froala-whiteboard.herokuapp.com/wysiwyg-editor/whiteboard/',
-                      'http://froala.com/',
-                      'https://froala.com/',
-                      'http://froala.com/wysiwyg-editor/whiteboard/',
-                      'https://froala.com/wysiwyg-editor/whiteboard/'
-                      ];
+    'http://localhost:3000',
+    'http://froala-whiteboard.herokuapp.com/',
+    'https://froala-whiteboard.herokuapp.com/',
+    'http://froala-whiteboard.herokuapp.com/wysiwyg-editor/whiteboard/',
+    'https://froala-whiteboard.herokuapp.com/wysiwyg-editor/whiteboard/',
+    'http://froala-whiteboard-staging.herokuapp.com/',
+    'https://froala-whiteboard-staging.herokuapp.com/',
+    'http://froala-whiteboard-staging.herokuapp.com/wysiwyg-editor/whiteboard/',
+    'https://froala-whiteboard-staging.herokuapp.com/wysiwyg-editor/whiteboard/',
+    'http://froala.com/',
+    'https://froala.com/',
+    'http://froala.com/wysiwyg-editor/whiteboard/',
+    'https://froala.com/wysiwyg-editor/whiteboard/'
+  ];
 
 var corsOptions = {
   origin: function(origin, callback){

@@ -84,6 +84,8 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'froala-fun','build','index.html'))
 })
 
+console.log("this is the dirname", __dirname)
+
 // app.route('*').get(function(req, res, next) {
 
 //   req.get('/', function(err, response, body) {

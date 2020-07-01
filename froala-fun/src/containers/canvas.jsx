@@ -37,10 +37,10 @@ class Canvas extends Component {
 
   componentDidMount() {
     //When component mounts, we make a call to the backend to retrieve a signature for communicating with S3
-    fetch('/api/get_signature').then(res => res.json()).then( res => {
+    fetch('/wysiwyg-editor/whiteboard/api/get_signature').then(res => res.json()).then( res => {
       this.setState({secondClick: res})
     })
-    fetch('/api/get_frofro').then(res => res.text()).then( res => {
+    fetch('/wysiwyg-editor/whiteboard/api/get_frofro').then(res => res.text()).then( res => {
       this.setState({styling: res})
     })
     // fetch('https://froala-whiteboard.herokuapp.com/api/get_signature').then(res => res.json()).then( res => {

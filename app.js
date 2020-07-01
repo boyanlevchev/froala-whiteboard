@@ -38,6 +38,8 @@ var cors = function(req, res, next) {
     'http://localhost:3000',
     'http://froala-whiteboard.herokuapp.com/',
     'https://froala-whiteboard.herokuapp.com/',
+    'http://froala-whiteboard.herokuapp.com/wysiwyg-editor/whiteboard/',
+    'https://froala-whiteboard.herokuapp.com/wysiwyg-editor/whiteboard/',
     'http://froala.com/',
     'https://froala.com/',
     'http://froala.com/wysiwyg-editor/whiteboard/',
@@ -73,10 +75,10 @@ app.use('/wysiwyg-editor/whiteboard', express.static(path.join(__dirname, './fro
 //   res.sendFile(path.join(__dirname, 'froala-fun','build','index.html'))
 // })
 
-app.use('/', indexRouter);
-app.use('/api/users', usersRouter);
-app.use('/api/get_signature', signatureRouter);
-app.use('/api/get_frofro', frofroRouter);
+app.use('/wysiwyg-editor/whiteboard/', indexRouter);
+app.use('/wysiwyg-editor/whiteboard/api/users', usersRouter);
+app.use('/wysiwyg-editor/whiteboard/api/get_signature', signatureRouter);
+app.use('/wysiwyg-editor/whiteboard/api/get_frofro', frofroRouter);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'froala-fun','build','index.html'))

@@ -18,12 +18,14 @@ class Canvas extends Component {
 
     //We create a React ref to the sketchfield, which allows us to capture the initial instance of the sketchfield to manipulate
     this.sketchField = React.createRef();
+    this.eraserField = React.createRef();
 
     this.state = {
       firstClick: 0,
       editorComponents: {},
       editorIDs: 0,
       drawable: false,
+      erasable: false,
       currentSketchField: "",
       lastRef: [],
       fetchedSketchfield: {},
@@ -207,6 +209,13 @@ class Canvas extends Component {
         drawable: true
       })
     }
+
+    //testing if eraser works
+    if (event.keyCode === 90) {
+      this.setState({
+        erasable: true
+      })
+    }
   }
 
   handleKeyUp = (event) => {
@@ -218,6 +227,13 @@ class Canvas extends Component {
     if ( event.keyCode === 18 ){
       this.setState({
         drawable: false
+      })
+    }
+
+    //testing if eraser works
+    if (event.keyCode === 90) {
+      this.setState({
+        erasable: false
       })
     }
   }
@@ -347,19 +363,31 @@ class Canvas extends Component {
     })
   }
 
+  handleSketchErase = (sketch, erase) => {
+    if (erase && erase.objects && erase.objects[0] && erase.objects[0].path) {
+      console.log(sketch.objects, erase.objects[0].path)
+    }
+  }
+
   render(){
     let placeholderClass = "canvas-placeholder-visible"
     let sketchFieldClass = "sketchField sketchFieldInactive"
+    let eraserFieldClass = "sketchfield eraserFieldInactive"
     let SketchFieldHolder
+    let EraserFieldHolder
     let loaderClass = ""
     let loaderDivClass = "loaderDiv"
+
+
 
     // if (this.props.fetchedEditors) {
     //   console.log("fetched editors",this.props.fetchedEditors)
     // }
 
     // console.log(this.state.fetchedSketchfield, "fetched sketchfield")
-    // if(this.sketchField.current){console.log(this.sketchField.current.toJSON(), "current sketchfield")}
+    if(this.eraserField.current && this.sketchField.current) {
+      this.handleSketchErase(this.sketchField.current.toJSON(), this.eraserField.current.toJSON())
+    }
     // console.log(this.state.lastRef, "last ref")
 
     if (Object.keys(this.state.editorComponents).length > 0 || this.state.lastRef.length > 0){
@@ -374,11 +402,23 @@ class Canvas extends Component {
       SketchFieldHolder = <SketchField  width='1500px'
                               height='800px'
                               tool={Tools.Pencil}
-                              lineColor='black'
+                              lineColor='transparent'
                               lineWidth={3}
                               paintFirst="stroke"
                               value={this.state.fetchedSketchfield}
                               ref={this.sketchField}
+                              />
+    }
+
+    if (this.state.erasable) {
+      eraserFieldClass = "sketchField"
+      EraserFieldHolder = <SketchField  width='1500px'
+                              height='800px'
+                              tool={Tools.Pencil}
+                              lineColor='red'
+                              lineWidth={3}
+                              paintFirst="stroke"
+                              ref={this.eraserField}
                               />
     }
     if (this.state.initialFetch === true) {
@@ -400,9 +440,6 @@ class Canvas extends Component {
             </div>
             <div id="controls">
               <Controls path={this.props.path}/>
-              {/*<p>Hold 'cmd' to drag items</p>
-                              <p>Hold 'alt' to draw</p>
-                              <p onClick={this.handleClearWhiteboard} class="clear-button">Clear Whiteboard</p>*/}
             </div>
             <div
               id="canvas"
@@ -416,7 +453,9 @@ class Canvas extends Component {
               </div>
               <div className={sketchFieldClass}>
                 {SketchFieldHolder}
-
+              </div>
+              <div className={eraserFieldClass}>
+                {EraserFieldHolder}
               </div>
               {Object.keys(this.state.editorComponents).map( editor => {
                 // console.log(editor)

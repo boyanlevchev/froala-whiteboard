@@ -7,9 +7,11 @@ import Button from 'react-bootstrap/Button';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faTrash, faPen, faHandPaper } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faTrash, faPen, faHandPaper, faShareAlt } from '@fortawesome/free-solid-svg-icons'
 
 import { resetWhiteboard, addEditor, setCanvasDrawable, setDragnDropButtonActive } from '../actions'
+
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 class Controls extends Component {
   constructor(props) {
@@ -18,7 +20,8 @@ class Controls extends Component {
     this.state = {
       isExpanded: null,
       penButtonActive: false,
-      dragnDropButtonActive: false
+      dragnDropButtonActive: false,
+      shareClicked: false
     };
 
     this.handleExpandClick = this.handleExpandClick.bind(this);
@@ -75,6 +78,19 @@ class Controls extends Component {
     }
   }
 
+  handleCopyLink = () => {
+    this.setState({
+      shareClicked: true
+    })
+    setTimeout(() => {
+      this.setState({shareClicked: false});
+    }, 2000)
+  }
+
+  handleMouseLeft = () => {
+    this.setState({shareClicked: false});
+  }
+
   render() {
     const expandStyle = {
       border: '3px solid #0599F7',
@@ -91,6 +107,12 @@ class Controls extends Component {
     let togglerText = "Show tools"
     let penClass = "tools"
     let dragnDropClass = "tools"
+    let shareHeader = "Share"
+    let shareText = "Copy the link to this whiteboard and send it to your friends and coworkers"
+    let shareTooltipTextClass = "shareTooltipTextClass"
+    let shareTooltipClass = ""
+    let shareTooltipHeaderClass = "shareTooltipHeaderClass"
+    let jello = ""
 
     if (this.state.isExpanded === true){
       toggleClass = "toolsExpand"
@@ -107,6 +129,15 @@ class Controls extends Component {
     console.log(this.props.dragnDropButtonActive, "button active")
     if (this.props.dragnDropButtonActive) {
       dragnDropClass += " dragnDropButtonActive"
+    }
+
+    if (this.state.shareClicked) {
+      shareHeader = null
+      shareText = "Link to whiteboard has been copied! \n You can now send it to anybody!"
+      shareTooltipTextClass = "shareTooltipTextClassClicked"
+      shareTooltipClass = "shareTooltipClass"
+      jello = "jello-horizontal"
+      // shareTooltipHeaderClass = "shareTooltipHeaderClassClicked"
     }
 
 
@@ -151,6 +182,21 @@ class Controls extends Component {
                   }
                 >
                 <button className={dragnDropClass} id={"dragnDropButton"} onClick={this.handleDragnDropButton} ><FontAwesomeIcon icon={faHandPaper} size="1x"/></button>
+              </OverlayTrigger>
+
+              <OverlayTrigger
+                placement={"right"}
+                overlay={
+                  <Tooltip id={`tooltip-hand`} className={shareTooltipClass}>
+                    <div className={jello}>
+                      {!this.state.shareClicked && <span><strong className={shareTooltipHeaderClass}>{shareHeader}</strong><br/></span>}<small><i className={shareTooltipTextClass}>{shareText}</i></small>
+                    </div>
+                  </Tooltip>
+                }
+              >
+                <CopyToClipboard text={window.location.href} onCopy={this.handleCopyLink}>
+                  <button className={"tools"} id={"shareButton"} onClick={this.handleCopyLink} onMouseLeave={this.handleMouseLeft}><FontAwesomeIcon icon={faShareAlt} size="1x"/></button>
+                </CopyToClipboard>
               </OverlayTrigger>
 
               <OverlayTrigger

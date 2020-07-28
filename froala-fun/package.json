@@ -33,7 +33,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "homepage": "staging.froala.com/wysiwyg-editor/whiteboard",
+  "homepage": "https://froala.com/wysiwyg-editor/whiteboard",
   "eslintConfig": {
     "extends": "react-app"
   },

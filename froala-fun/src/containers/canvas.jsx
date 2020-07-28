@@ -6,6 +6,7 @@ import { selectEditor, setDragging, setCanvasDraggable, addEditor, updateEditor,
 
 import Editor from '../components/froala'
 import Controls from '../components/controls'
+import Intro from '../components/intro'
 import {SketchField, Tools} from 'react-sketch';
 
 class Canvas extends Component {
@@ -33,15 +34,23 @@ class Canvas extends Component {
       clearingBoard: false,
       secondClick: {},
       styling: "",
-      mediaCounter: 0
+      mediaCounter: 0,
+      fadeLoader: false,
+      loaderFaded: false,
+      fadeIntro: false,
+      introFaded: false
     };
   }
 
   componentDidMount() {
+    //we create a nice looking variable of the whiteboard ID, which we will use as a filepath in S3 and Firebase
+    const path = this.props.path.replace('/','')
+
     //When component mounts, we make a call to the backend to retrieve a signature for communicating with S3
-    fetch('/wysiwyg-editor/whiteboard/api/get_signature').then(res => res.json()).then( res => {
+    fetch(`/wysiwyg-editor/whiteboard/api/get_signature/${path}`).then(res => res.json()).then( res => {
       this.setState({secondClick: res})
     })
+
     fetch('/wysiwyg-editor/whiteboard/api/get_frofro').then(res => res.text()).then( res => {
       this.setState({styling: res})
     })
@@ -209,13 +218,6 @@ class Canvas extends Component {
         drawable: true
       })
     }
-
-    //testing if eraser works
-    if (event.keyCode === 90) {
-      this.setState({
-        erasable: true
-      })
-    }
   }
 
   handleKeyUp = (event) => {
@@ -227,13 +229,6 @@ class Canvas extends Component {
     if ( event.keyCode === 18 ){
       this.setState({
         drawable: false
-      })
-    }
-
-    //testing if eraser works
-    if (event.keyCode === 90) {
-      this.setState({
-        erasable: false
       })
     }
   }
@@ -363,38 +358,47 @@ class Canvas extends Component {
     })
   }
 
-  handleSketchErase = (sketch, erase) => {
-    if (erase && erase.objects && erase.objects[0] && erase.objects[0].path) {
-      console.log(sketch.objects, erase.objects[0].path)
-    }
+
+  fadeOutLoader = () => {
+    setTimeout(() => {
+      this.setState({
+        fadeLoader: true
+      })
+      setTimeout(() =>{
+        this.setState({
+          loaderFaded: true
+        })
+      }, 500)
+    }, 300)
+  }
+
+  fadeOutIntro = () => {
+    this.setState({
+      fadeIntro: true
+    })
+    setTimeout(() => {
+      this.setState({
+        introFaded: true
+      })
+    }, 300)
   }
 
   render(){
     let placeholderClass = "canvas-placeholder-visible"
     let sketchFieldClass = "sketchField sketchFieldInactive"
-    let eraserFieldClass = "sketchfield eraserFieldInactive"
     let SketchFieldHolder
-    let EraserFieldHolder
     let loaderClass = ""
     let loaderDivClass = "loaderDiv"
 
 
-
-    // if (this.props.fetchedEditors) {
-    //   console.log("fetched editors",this.props.fetchedEditors)
-    // }
-
-    // console.log(this.state.fetchedSketchfield, "fetched sketchfield")
-    if(this.eraserField.current && this.sketchField.current) {
-      this.handleSketchErase(this.sketchField.current.toJSON(), this.eraserField.current.toJSON())
+    if (this.state.fadeIntro) {
+      placeholderClass = "canvas-placeholder-visible canvas-placeholder-hidden"
     }
-    // console.log(this.state.lastRef, "last ref")
 
-    if (Object.keys(this.state.editorComponents).length > 0 || this.state.lastRef.length > 0){
-      placeholderClass = "canvas-placeholder-hidden"
-    } else {
-      placeholderClass = "canvas-placeholder-visible"
+    if ((Object.keys(this.state.editorComponents).length > 0 || this.state.lastRef.length > 0) && !this.state.fadeIntro){
+      this.fadeOutIntro()
     }
+
     if (this.state.drawable === true || this.props.canvasDrawable === true){
       sketchFieldClass = "sketchField"
     }
@@ -402,7 +406,7 @@ class Canvas extends Component {
       SketchFieldHolder = <SketchField  width='1500px'
                               height='800px'
                               tool={Tools.Pencil}
-                              lineColor='transparent'
+                              lineColor='black'
                               lineWidth={3}
                               paintFirst="stroke"
                               value={this.state.fetchedSketchfield}
@@ -410,18 +414,11 @@ class Canvas extends Component {
                               />
     }
 
-    if (this.state.erasable) {
-      eraserFieldClass = "sketchField"
-      EraserFieldHolder = <SketchField  width='1500px'
-                              height='800px'
-                              tool={Tools.Pencil}
-                              lineColor='red'
-                              lineWidth={3}
-                              paintFirst="stroke"
-                              ref={this.eraserField}
-                              />
+    if (this.state.initialFetch === true && !this.state.fadeLoader) {
+      this.fadeOutLoader()
     }
-    if (this.state.initialFetch === true) {
+
+    if (this.state.fadeLoader) {
       loaderClass = "fadeoutLoader"
       loaderDivClass = " fadeoutLoaderDiv"
     }
@@ -435,9 +432,13 @@ class Canvas extends Component {
               <a href="https://www.froala.com"><img id="froala-logo" src="FroalaLogo.png" alt="Froala Logo - return to home page button"/></a>
               <h1> Whiteboard </h1>
             </div>
-            <div className={loaderDivClass} style={{position: 'absolute', zIndex: '5', top: '0', left: '0', width: '100%', height: '100%', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-              <img className={loaderClass} style={{width: '100px', height: '100px', background: 'transparent', filter: 'hue-rotate(110deg) brightness(0.62) contrast(400%)'}} src="Cells-256px.gif" alt="loading bar"/>
-            </div>
+
+            {!this.state.loaderFaded &&
+              <div className={loaderDivClass} style={{position: 'absolute', zIndex: '5', top: '0', left: '0', width: '100%', height: '100%', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <img className={loaderClass} style={{width: '100px', height: '100px', background: 'transparent', filter: 'hue-rotate(110deg) brightness(0.62) contrast(400%)'}} src="Cells-256px.gif" alt="loading bar"/>
+              </div>
+            }
+
             <div id="controls">
               <Controls path={this.props.path}/>
             </div>
@@ -448,15 +449,20 @@ class Canvas extends Component {
               onMouseUp={this.handleMouseUp}
               tabIndex="0"
             >
-              <div id="canvas-placeholder">
-                <h3 className={placeholderClass} >Double-click anywhere to begin...</h3>
-              </div>
+
+              {!this.state.introFaded &&
+                <div id="canvas-placeholder" className={placeholderClass}>
+
+                  <Intro fadeOut={this.fadeOutIntro}/>
+                </div>
+              }
+
               <div className={sketchFieldClass}>
                 {SketchFieldHolder}
               </div>
-              <div className={eraserFieldClass}>
+              {/*<div className={eraserFieldClass}>
                 {EraserFieldHolder}
-              </div>
+              </div>*/}
               {Object.keys(this.state.editorComponents).map( editor => {
                 // console.log(editor)
                 return <Editor id={editor}

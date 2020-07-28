@@ -41,11 +41,14 @@ var FroalaEditor = require('wysiwyg-editor-node-sdk');
 var moment = require('moment');
 var crypto = require('crypto');
 
-router.get('/', function (req, res, next) {
+
+router.get('/:s3folder', function (req, res, next) {
+  s3folder = req.params.s3folder
   var s3Config = {
       bucket: process.env.AWS_S3_BUCKET,
-      region: 's3-eu-west-2',
-      keyStart: '',
+      // region: 's3-eu-west-2',
+      region: 's3.us-east-1',
+      keyStart: s3folder + '/',
       acl: 'public-read-write',
       accessKeyId: process.env.AWS_ACCESS_KEY
   };

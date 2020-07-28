@@ -6,7 +6,7 @@
     "start": "node ./bin/www",
     "heroku-postbuild": "cd froala-fun && npm install --only=dev && npm install && npm run build"
   },
-  "homepage": "staging.froala.com/wysiwyg-editor/whiteboard",
+  "homepage": "https://froala.com/wysiwyg-editor/whiteboard",
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",

@@ -96,14 +96,6 @@ class Editor extends Component {
     }
   }
 
-  handleMouseOver = (e) => {
-    if (e.target.tagName === 'IFRAME' && this.props.canvasDraggable) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false
-    }
-  }
-
   handleClick = (e) => {
     this.props.selectEditor(this.props.id)
     if (this.props.canvasDraggable){
@@ -112,6 +104,7 @@ class Editor extends Component {
   }
 
   handleMouseDown = (event) => {
+    console.log(event.target)
     this.props.selectEditor(this.props.id)
     if (this.props.canvasDraggable || this.props.dragnDropButtonActive) {
       event.preventDefault()
@@ -197,7 +190,8 @@ class Editor extends Component {
       position: 'absolute',
       top: `${this.props.y}px`,
       left: `${this.props.x}px`,
-      minWidth: '170px'
+      minWidth: '200px',
+      zIndex: '0'
     }
 
     Froalaeditor.DefineIcon('deleteItem', { NAME: 'deleteItem', SVG_KEY: 'remove' })
@@ -257,12 +251,12 @@ class Editor extends Component {
     }
     return (
       <div
-        className={editorClass}
         style={style}
+        className={editorClass}
         id={this.props.id}
         onClick={this.handleClick}
         onMouseDown={this.handleMouseDown}
-        onMouseOver={this.handleMouseOver}
+
       >
         <FroalaEditor
           config={config}

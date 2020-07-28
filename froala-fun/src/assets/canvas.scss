@@ -1,14 +1,8 @@
-
 #canvas {
   min-height: 700px;
   min-width: 1500px;
   position: relative;
-  shadow: none;
   outline: none;
-  & :focus{
-    shadow: none;
-    outline: none;
-  }
 }
 
 #canvas-header {
@@ -27,25 +21,26 @@
   font-weight: 200;
   font-size: 28px;
   line-height: 0.79;
-
 }
 
 #canvas-placeholder {
   height: 100vh;
   width: 100vw;
   position: absolute;
-  z-index: -1;
+  z-index: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.canvas-placeholder-hidden {
-  display:none;
+  pointer-events:none;
 }
 
 .canvas-placeholder-visible {
-  display:block;
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.canvas-placeholder-hidden {
+  opacity: 0;
 }
 
 .sketchField {

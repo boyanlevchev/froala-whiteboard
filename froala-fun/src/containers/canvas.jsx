@@ -429,7 +429,7 @@ class Canvas extends Component {
           onKeyUp={this.handleKeyUp}
           >
             <div id="canvas-header">
-              <a href="https://www.froala.com"><img id="froala-logo" src="FroalaLogo.png" alt="Froala Logo - return to home page button"/></a>
+              <a href="https://www.froala.com/wysiwyg-editor/"><img id="froala-logo" src="FroalaLogo.png" alt="Froala Logo - return to home page button"/></a>
               <h1> Whiteboard </h1>
             </div>
 

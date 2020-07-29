@@ -187,7 +187,7 @@ class Controls extends Component {
               <OverlayTrigger
                 placement={"right"}
                 overlay={
-                  <Tooltip id={`tooltip-hand`} className={shareTooltipClass}>
+                  <Tooltip id={`tooltip-share`} className={shareTooltipClass}>
                     <div className={jello}>
                       {!this.state.shareClicked && <span><strong className={shareTooltipHeaderClass}>{shareHeader}</strong><br/></span>}<small><i className={shareTooltipTextClass}>{shareText}</i></small>
                     </div>
@@ -197,6 +197,17 @@ class Controls extends Component {
                 <CopyToClipboard text={window.location.href} onCopy={this.handleCopyLink}>
                   <button className={"tools"} id={"shareButton"} onClick={this.handleCopyLink} onMouseLeave={this.handleMouseLeft}><FontAwesomeIcon icon={faShareAlt} size="1x"/></button>
                 </CopyToClipboard>
+              </OverlayTrigger>
+
+              <OverlayTrigger
+                placement={"right"}
+                overlay={
+                  <Tooltip id={`tooltip-tutorial`}>
+                      <strong>Tutorial</strong><br/><small><i>Click to watch the tutorial again!</i></small>
+                  </Tooltip>
+                }
+              >
+                <button className={"tools"} id={"tutorialButton"} onClick={this.props.triggerIntro}>?</button>
               </OverlayTrigger>
 
               <OverlayTrigger

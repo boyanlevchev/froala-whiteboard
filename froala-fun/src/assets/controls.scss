@@ -68,6 +68,16 @@
   font-weight: bolder;
 }
 
+#tutorialButton {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+#tutorialButton:hover {
+  background-color: #832161;
+  border-color: #832161;
+  color: white;
+}
 
 
 .jello-horizontal {

@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap');
+
+#sidebar-menu {
+  height: 100%;
+  width: 250px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  background-color: white;
+  box-shadow: -3pt 0pt 8pt 2pt rgba(210,210,210,0.6);
+  transition: 0.5s;
+  z-index: 5;
+}
+
+.hidden {
+  box-shadow: 0pt 0pt 0pt 0pt rgba(210,210,210,0.6);
+  transform: translate(260px);
+}
+
+.sidebar-open {
+  position: fixed;
+  right: 25px;
+  top: 30px;
+  border: 0;
+  background-color: transparent;
+  font-size: 18px;
+  color: #0599F7;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.sidebar-close {
+  position: absolute;
+  top: 7px;
+  right: 12px;
+  background-color: transparent;
+  border: 0;
+  color: #7a7a7a;
+  font-family: 'Nunito', sans-serif;
+  font-size: 25px;
+  transform: scaleY(0.85);
+}

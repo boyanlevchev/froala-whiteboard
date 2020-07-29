@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BrowserRouter as Router,
   Switch,
@@ -6,19 +6,24 @@ import {
   useLocation
 } from "react-router-dom";
 
+import Sidebar from './components/sidebar'
+import Canvas from './containers/canvas'
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBars } from '@fortawesome/free-solid-svg-icons'
+
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
 
 
-import Canvas from './containers/canvas'
-
 function App() {
   // Below we use React router to allow us to access location and history of current page (housed in <Switch>)
   // Then we render CanvasHolder, which holds the Canvas component, and calculates a unique URL
+
   return (
     <Router basename={'/wysiwyg-editor/whiteboard'}>
       <Switch>
-        <CanvasHolder/>
+          <CanvasHolder/>
       </Switch>
     </Router>
   );
@@ -31,6 +36,9 @@ function urlCalculator() {
 
 //a function that calculates the unqiue url for the generated whiteboard
 function CanvasHolder() {
+
+  // const [sidebarHidden, setSidebarHidden] = useState(false);
+
   const location = useLocation();
   const history = useHistory();
   let path = "";
@@ -62,10 +70,14 @@ function CanvasHolder() {
 
   //returns canvas component with above-calculated unique url as prop (canvas was old name for the whiteboard, when it was still an art canvas for Net Art and web2.0 content)
   return (
-    <div className="App">
+    <div id="app" className="App">
+
       <Canvas path={path}/>
     </div>
   );
 }
+
+/*<button className={"sidebar-open"} onClick={()=>{setSidebarHidden(true)}}><FontAwesomeIcon icon={faBars} size="lg"/></button>
+      <Sidebar hidden={sidebarHidden} closeSidebar={()=>{setSidebarHidden(false)}}/>*/
 
 export default App;

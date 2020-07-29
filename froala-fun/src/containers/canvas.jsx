@@ -37,6 +37,7 @@ class Canvas extends Component {
       mediaCounter: 0,
       fadeLoader: false,
       loaderFaded: false,
+      tutorialFinished: false,
       fadeIntro: false,
       introFaded: false
     };
@@ -102,12 +103,14 @@ class Canvas extends Component {
       const editorID = (this.props.fetchedEditors.editorID ? this.props.fetchedEditors.editorID : 0 )
       const editors = (this.props.fetchedEditors.editors ? this.props.fetchedEditors.editors : {})
       const lastRef = (this.props.fetchedEditors.sketchfield ? JSON.parse(sketchfield).objects : [])
+      const tutorialFinished = (this.props.fetchedEditors.tutorialFinished ? this.props.fetchedEditors.tutorialFinished : false)
         this.setState({
           editorIDs: editorID,
           editorComponents: editors,
           fetchedSketchfield: sketchfield,
           lastRef: lastRef,
-          initialFetch: true
+          initialFetch: true,
+          tutorialFinished: tutorialFinished
         })
     }
 
@@ -332,9 +335,6 @@ class Canvas extends Component {
     const sketchfieldPath = this.props.path + '/sketchfield'
     const confirmationPathAndKey = this.props.path +'/confirmclear'
 
-    // console.log(pathname)
-
-
     this.setState({
       editorComponents: {},
       editorIDs: 0,
@@ -373,6 +373,9 @@ class Canvas extends Component {
   }
 
   fadeOutIntro = () => {
+
+    const path = this.props.path + "/tutorialFinished"
+
     this.setState({
       fadeIntro: true
     })
@@ -381,6 +384,24 @@ class Canvas extends Component {
         introFaded: true
       })
     }, 300)
+
+    this.props.updateEditor({[path]: true})
+  }
+
+  fadeInIntro = () => {
+    const path = this.props.path + "/tutorialFinished"
+
+    this.props.updateEditor({[path]: false})
+    this.setState({
+      introFaded: false,
+      tutorialFinished: false
+    }, () => {
+      setTimeout(() => {
+        this.setState({
+          fadeIntro: false
+        })
+      }, 10)
+    })
   }
 
   render(){
@@ -395,7 +416,7 @@ class Canvas extends Component {
       placeholderClass = "canvas-placeholder-visible canvas-placeholder-hidden"
     }
 
-    if ((Object.keys(this.state.editorComponents).length > 0 || this.state.lastRef.length > 0) && !this.state.fadeIntro){
+    if (this.state.tutorialFinished === true && this.state.fadeIntro === false){
       this.fadeOutIntro()
     }
 
@@ -440,7 +461,7 @@ class Canvas extends Component {
             }
 
             <div id="controls">
-              <Controls path={this.props.path}/>
+              <Controls path={this.props.path} triggerIntro={this.fadeInIntro}/>
             </div>
             <div
               id="canvas"
@@ -460,9 +481,6 @@ class Canvas extends Component {
               <div className={sketchFieldClass}>
                 {SketchFieldHolder}
               </div>
-              {/*<div className={eraserFieldClass}>
-                {EraserFieldHolder}
-              </div>*/}
               {Object.keys(this.state.editorComponents).map( editor => {
                 // console.log(editor)
                 return <Editor id={editor}

@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
@@ -149,16 +147,5 @@ class Intro extends Component {
   }
 }
 
-function mapDispatchToProps(dispatch) {
-  return bindActionCreators( {
-  },
-    dispatch
-  );
-}
 
-function mapReduxStateToProps(reduxState) {
-  return {
-  }
-}
-
-export default connect(mapReduxStateToProps, mapDispatchToProps)(Intro);
+export default Intro;

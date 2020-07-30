@@ -47,7 +47,7 @@ router.get('/:s3folder', function (req, res, next) {
   var s3Config = {
       bucket: process.env.AWS_S3_BUCKET,
       // region: 's3-eu-west-2',
-      region: 's3.us-east-1',
+      region: 's3-us-east-1',
       keyStart: s3folder + '/',
       acl: 'public-read-write',
       accessKeyId: process.env.AWS_ACCESS_KEY

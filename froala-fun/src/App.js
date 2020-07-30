@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   BrowserRouter as Router,
   Switch,
@@ -6,11 +6,11 @@ import {
   useLocation
 } from "react-router-dom";
 
-import Sidebar from './components/sidebar'
+// import Sidebar from './components/sidebar'
 import Canvas from './containers/canvas'
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBars } from '@fortawesome/free-solid-svg-icons'
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+// import { faBars } from '@fortawesome/free-solid-svg-icons'
 
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -71,13 +71,13 @@ function CanvasHolder() {
   //returns canvas component with above-calculated unique url as prop (canvas was old name for the whiteboard, when it was still an art canvas for Net Art and web2.0 content)
   return (
     <div id="app" className="App">
-
+      {/*<button className={"sidebar-open"} onClick={()=>{setSidebarHidden(true)}}><FontAwesomeIcon icon={faBars} size="lg"/></button>
+            <Sidebar hidden={sidebarHidden} closeSidebar={()=>{setSidebarHidden(false)}}/>*/}
       <Canvas path={path}/>
     </div>
   );
 }
 
-/*<button className={"sidebar-open"} onClick={()=>{setSidebarHidden(true)}}><FontAwesomeIcon icon={faBars} size="lg"/></button>
-      <Sidebar hidden={sidebarHidden} closeSidebar={()=>{setSidebarHidden(false)}}/>*/
+
 
 export default App;

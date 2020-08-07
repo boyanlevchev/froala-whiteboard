@@ -11,6 +11,8 @@ var signatureRouter = require('./routes/get_signature');
 var frofroRouter = require('./routes/get_frofro');
 
 
+// Setting permitted websites for accessing the server - only whitelisted sites can reach API
+
 var cors = function(req, res, next) {
   var whitelist = [
     'http://localhost:3000',
@@ -38,6 +40,7 @@ var cors = function(req, res, next) {
 
 var app = express();
 
+// tell app to use above-defined whitelist
 app.use(cors);
 
 // view engine setup
@@ -49,21 +52,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-
+// tell the app to build root url from directory /wysiwyg-editor/whiteboard
 app.use('/wysiwyg-editor/whiteboard', express.static(path.join(__dirname, './froala-fun/build')))
 
-
+// makes homepage /wysiwyg-editor/whiteboard/, all route calls are made from home page
 app.use('/wysiwyg-editor/whiteboard/', indexRouter);
 app.use('/wysiwyg-editor/whiteboard/api/users', usersRouter);
 app.use('/wysiwyg-editor/whiteboard/api/get_signature', signatureRouter);
 app.use('/wysiwyg-editor/whiteboard/api/get_frofro', frofroRouter);
 
-
+// if no routes above matched, then always redirect user to home page
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'froala-fun','build','index.html'))
 })
-
-// console.log("this is the dirname", __dirname)
 
 
 // catch 404 and forward to error handler

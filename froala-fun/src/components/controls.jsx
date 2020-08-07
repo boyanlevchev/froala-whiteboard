@@ -27,6 +27,7 @@ class Controls extends Component {
     this.handleExpandClick = this.handleExpandClick.bind(this);
   }
 
+  // Expand or retract the tool menu
   handleExpandClick = () => {
     if (this.state.isExpanded === null) {
       this.setState({
@@ -39,6 +40,7 @@ class Controls extends Component {
     }
   }
 
+  // Sets the pen tool active, and makes the canvas "drawable"
   handlePenButton = () => {
     this.setState({
       penButtonActive: !this.state.penButtonActive,
@@ -53,6 +55,7 @@ class Controls extends Component {
     })
   }
 
+  // sets the grab n drag tool active, and makes editors "draggable"
   handleDragnDropButton = () => {
     this.setState({
       dragnDropButtonActive: !this.state.dragnDropButtonActive,
@@ -69,6 +72,7 @@ class Controls extends Component {
     })
   }
 
+  // deletes everything on the screen - sends the delete message through FireBase so it can be retrieved by all open sessions of the Whiteboard
   handleDeleteButton = () => {
     const confirmation = window.confirm("Are you sure you want to delete? This can't be undone");
     if ( confirmation === true ) {
@@ -78,6 +82,7 @@ class Controls extends Component {
     }
   }
 
+  // Changes the state between true and false to allow for the animation that happens on clicking - farther down the actual url gets copied to clipboard
   handleCopyLink = () => {
     this.setState({
       shareClicked: true
@@ -87,11 +92,13 @@ class Controls extends Component {
     }, 2000)
   }
 
+  // resets the animation for the share button if the mouse leaves it
   handleMouseLeft = () => {
     this.setState({shareClicked: false});
   }
 
   render() {
+    // The CSS for the main tool menu toggle button
     const expandStyle = {
       border: '3px solid #0599F7',
       borderRadius: '50%',
@@ -102,6 +109,7 @@ class Controls extends Component {
       marginBottom: '20px',
       textAlign: 'center'
     }
+
 
     let toggleClass = ""
     let togglerText = "Show tools"
@@ -114,6 +122,7 @@ class Controls extends Component {
     let shareTooltipHeaderClass = "shareTooltipHeaderClass"
     let jello = ""
 
+    // Sets CSS classes and text of the tool menu toggle to animate and pass through information
     if (this.state.isExpanded === true){
       toggleClass = "toolsExpand"
       togglerText = "Hide tools"
@@ -122,22 +131,23 @@ class Controls extends Component {
       togglerText = "Show tools"
     }
 
+    // Changes the styling of the pen button when active
     if (this.props.canvasDrawable) {
       penClass += " penButtonActive"
     }
 
-    console.log(this.props.dragnDropButtonActive, "button active")
+    // Changes the styling of the grab n drag button when active
     if (this.props.dragnDropButtonActive) {
       dragnDropClass += " dragnDropButtonActive"
     }
 
+    // Changes the CSS and text for the share button, and animates the info tooltip
     if (this.state.shareClicked) {
       shareHeader = null
       shareText = "Link to whiteboard has been copied! \n You can now send it to anybody!"
       shareTooltipTextClass = "shareTooltipTextClassClicked"
       shareTooltipClass = "shareTooltipClass"
       jello = "jello-horizontal"
-      // shareTooltipHeaderClass = "shareTooltipHeaderClassClicked"
     }
 
 
@@ -145,6 +155,8 @@ class Controls extends Component {
       <div>
         <Accordion>
           <div style={{position: "fixed", bottom: "0", zIndex: "1"}}>
+
+            {/* The tool menu toggle button, with a tooltip that shows info when hovering */}
             <OverlayTrigger
                   placement={"right"}
                   overlay={
@@ -160,8 +172,11 @@ class Controls extends Component {
               </Accordion.Toggle>
             </OverlayTrigger>
           </div>
+
           <Accordion.Collapse eventKey="0">
             <div style={{display: 'flex', flexDirection: 'column', width: '60px'}}>
+
+              {/* The button for the pen tool, along with a tooltip that shows info when hovering */}
               <OverlayTrigger
                   placement={"right"}
                   overlay={
@@ -173,6 +188,8 @@ class Controls extends Component {
                 <button className={penClass} id={"penButton"} onClick={this.handlePenButton} ><FontAwesomeIcon icon={faPen} size="1x"/></button>
               </OverlayTrigger>
 
+
+              {/* The button for the Grab n Drag tool, along with a tooltip that shows info when hovering */}
               <OverlayTrigger
                   placement={"right"}
                   overlay={
@@ -184,6 +201,8 @@ class Controls extends Component {
                 <button className={dragnDropClass} id={"dragnDropButton"} onClick={this.handleDragnDropButton} ><FontAwesomeIcon icon={faHandPaper} size="1x"/></button>
               </OverlayTrigger>
 
+              {/* The button for sharing, along with a tooltip that shows info when hovering - also changes inner text dependent on state.shareClicked.
+                  In addition, this houses the <CopyToClipboard/> componenet which is a cross browser and device plugin for copying text (in this case the url) to clipboard*/}
               <OverlayTrigger
                 placement={"right"}
                 overlay={
@@ -199,6 +218,8 @@ class Controls extends Component {
                 </CopyToClipboard>
               </OverlayTrigger>
 
+
+              {/* The button to reopen the tutorial, along with a tooltip that shows info when hovering */}
               <OverlayTrigger
                 placement={"right"}
                 overlay={
@@ -210,6 +231,8 @@ class Controls extends Component {
                 <button className={"tools"} id={"tutorialButton"} onClick={this.props.triggerIntro}>?</button>
               </OverlayTrigger>
 
+
+              {/* The button for clearing the whiteboard, along with a tooltip that shows info when hovering */}
               <OverlayTrigger
                   placement={"right"}
                   overlay={
@@ -220,6 +243,8 @@ class Controls extends Component {
                 >
                 <button className={"tools finalTool"} id={"clearWhiteboardButton"} onClick={this.handleDeleteButton}><FontAwesomeIcon icon={faTrash} size="1x"/></button>
               </OverlayTrigger>
+
+
             </div>
           </Accordion.Collapse>
         </Accordion>

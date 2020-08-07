@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET home page. */
+// a useless route, used for testing
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });

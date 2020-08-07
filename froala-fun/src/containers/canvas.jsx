@@ -34,7 +34,6 @@ class Canvas extends Component {
       clearingBoard: false,
       secondClick: {},
       styling: "",
-      mediaCounter: 0,
       fadeLoader: false,
       loaderFaded: false,
       tutorialFinished: false,
@@ -55,12 +54,7 @@ class Canvas extends Component {
     fetch('/wysiwyg-editor/whiteboard/api/get_frofro').then(res => res.text()).then( res => {
       this.setState({styling: res})
     })
-    // fetch('https://froala-whiteboard.herokuapp.com/api/get_signature').then(res => res.json()).then( res => {
-    //   this.setState({secondClick: res})
-    // })
-    // fetch('https://froala-whiteboard.herokuapp.com/api/get_frofro').then(res => res.text()).then( res => {
-    //   this.setState({styling: res})
-    // })
+
     //When component mounts, we make call the Redux function that retrieves items in database and begins to listen for changes
     this.props.fetchEditors(this.props.path.substring(1))
     this.props.fetchUpdates(this.props.path.substring(1))
@@ -129,8 +123,6 @@ class Canvas extends Component {
 
         //updates the sketchfield with other users' updates
         if (key === "sketchfield") {
-          // console.log("passes through here")
-          // console.log(key, "key", this.props.fetchedUpdate.val, "val")
           this.setState(prevState => ({
             fetchedSketchfield: this.props.fetchedUpdate.val,
             currentSketchField: this.props.fetchedUpdate.val,
@@ -151,7 +143,6 @@ class Canvas extends Component {
         } else if (this.props.fetchedUpdate.editors) {
 
           const editors = this.props.fetchedUpdate.editors
-          // console.log(editors.key, "key", editors.val, "val")
 
           //if it is an entirely new editor added by someone else i.e. the key doesn't exist yet locally
           if (!this.state.editorComponents[editors.key]) {
@@ -177,11 +168,10 @@ class Canvas extends Component {
               }
             }))
           } else {
-            // console.log("child changed, but updated nowhere")
+            //console.log("child changed, but updated nowhere")
           }
         }
       } else if (this.props.fetchedUpdate.childDeleted){
-        // console.log(this.props.fetchedUpdate.childDeleted, "deleted object")
         let newEditorComponents = this.state.editorComponents
 
         delete newEditorComponents[this.props.fetchedUpdate.childDeleted.key]
@@ -195,11 +185,7 @@ class Canvas extends Component {
     if (this.sketchField.current
       && (this.state.lastRef.length < this.sketchField.current.toJSON().objects.length)
       && !this.state.clearingBoard) {
-      // console.log("i think something is happening in here")
-      // console.log(this.state.lastRef.length, "< ? ", this.sketchField.current.toJSON().objects.length)
-      // console.log(this.sketchField.current.toJSON(), "current sketchfield ref")
-      // console.log(this.state.currentSketchField, "current state sketchfield")
-      // console.log(this.state.fetchedSketchfield, "fetched sketchfield")
+
       const pathAndKey = `${this.props.path}/sketchfield`
       this.props.updateEditor({[pathAndKey]: JSON.stringify(this.sketchField.current)})
       this.setState({
@@ -255,13 +241,12 @@ class Canvas extends Component {
   }
 
   doubleClick = (event) => {
-  // console.log("double click", this.props)
+
     if (event.target.id === "canvas" && this.props.canvasDraggable === false && !this.props.dragnDropButtonActive){
-      // console.log("is this one funky?")
       const x = event.clientX
       const y = (event.clientY - 60)
+
       if ( this.state.editorIDs === 0) {
-        // console.log("just checking")
         const key = `editor0`
         const pathAndKey = `${this.props.path}/editors/${key}`
         const pathAndEditorID = `${this.props.path}/editorID`
@@ -272,7 +257,6 @@ class Canvas extends Component {
         this.props.selectEditor(key)
         this.props.addEditor({[pathAndKey]: {html: "", x:x, y:y}, [pathAndEditorID]: 1})
       } else {
-        // console.log("just checking other one...", this.state.editorIDs)
         let id = (this.state.editorIDs)
         let key = `editor${id}`
         const pathAndKey = `${this.props.path}/editors/${key}`
@@ -292,14 +276,20 @@ class Canvas extends Component {
     }
   }
 
+  // Triggered when mouse is moved
   handleMouseMove = (event) => {
 
+    // if the editor is set to draggable, via either Redux props or the Grab n Drag button
     if(this.props.draggableEditor !== null && (this.props.canvasDraggable === true || this.props.dragnDropButtonActive === true)){
 
       let key = this.props.draggableEditor.key
       const html = this.state.editorComponents[key].html
+
+      // xOffset and yOffset is the distance from the edge of the editor to where the mouse clicks inside of it - defined in froala.jsx, and passed into the Redux prop draggableEditor
       const x = (event.clientX - this.props.draggableEditor.xOffset)
       const y = (event.clientY - this.props.draggableEditor.yOffset)
+
+      // if x and y are successfully defined above (without this, sometimes x and y remain undefined, and the app breaks)
       if (x && y){
         this.setState(prevState => ({
             editorComponents: {
@@ -314,10 +304,12 @@ class Canvas extends Component {
     }
   }
 
+  // if mouse is released, then we stop dragging the editor, hence stopping it from updating
   handleMouseUp = () => {
     this.props.setDragging(null)
   }
 
+  // we delete the editor locally - but note that we retain the index in this.state.editorIDs - this functions like IDs in databases, you don't want it to reset!
   handleDelete = () => {
     let newEditorComponents = this.state.editorComponents
 
@@ -347,8 +339,9 @@ class Canvas extends Component {
       this.props.deleteEditor(editorIDpath);
       this.props.deleteEditor(sketchfieldPath);
       this.props.updateEditor({[confirmationPathAndKey]: false});
-      this.props.resetRedux();
+      this.props.resetRedux(); // We reset all of our Redux props to their default
       document.documentElement.style.cursor = "default";
+
       //having the clearingBoard state allows us to stop certain updates that should not happen before everything has been cleared off the board
       //it allows us to quickly destroy and reinitialize the sketchpad, which solves some annoying problems where it wouldn't want to delete locally
       //due to a mismatch between the state and the ref of the sketchpad
@@ -359,6 +352,10 @@ class Canvas extends Component {
   }
 
 
+  // The loader at the start is set to fade out once objects have been retrieved from Firebase
+  // but we give it a slight lag, to ensure the data is already displayed when the loader actually fades out
+  // otherwise sometimes the loader would fade, and only then the data would pop on the screen
+  // also prevents users from adding new items before everything else loads
   fadeOutLoader = () => {
     setTimeout(() => {
       this.setState({
@@ -372,22 +369,24 @@ class Canvas extends Component {
     }, 300)
   }
 
+  // The intro fades out when we hit the close button
   fadeOutIntro = () => {
 
     const path = this.props.path + "/tutorialFinished"
 
     this.setState({
-      fadeIntro: true
+      fadeIntro: true // Triggers the CSS that makes the intro fade out
     })
     setTimeout(() => {
       this.setState({
-        introFaded: true
+        introFaded: true // Triggers the CSS that makes the intro 'display: none;'' (we do this, as "display:none" cannot be transitioned, so we just add it once the visual transition has completed)
       })
     }, 300)
 
-    this.props.updateEditor({[path]: true})
+    this.props.updateEditor({[path]: true}) //we create a Boolean in Firebase that allows us to know if the intro has already been watched, so it does not show when we reload the page
   }
 
+  // Shows the intro if we select it from the button in the tools menu
   fadeInIntro = () => {
     const path = this.props.path + "/tutorialFinished"
 
@@ -416,13 +415,19 @@ class Canvas extends Component {
       placeholderClass = "canvas-placeholder-visible canvas-placeholder-hidden"
     }
 
+    // If tutorial has been finished, but the fadeIntro hasn't been triggered yet
+    // having second parameter prevents an infinite loops from happening
+    // so that the minute fadeintro is true, we don't recall this.fadeOutIntro
     if (this.state.tutorialFinished === true && this.state.fadeIntro === false){
       this.fadeOutIntro()
     }
 
+    // We make the sketchfield drawable, by adding pointer events via CSS class
     if (this.state.drawable === true || this.props.canvasDrawable === true){
       sketchFieldClass = "sketchField"
     }
+
+    // this line resets the drawing board
     if (!this.state.clearingBoard) {
       SketchFieldHolder = <SketchField  width='1500px'
                               height='800px'
@@ -435,10 +440,12 @@ class Canvas extends Component {
                               />
     }
 
+    // if we have fetched everything from Firebase, starting fading out the loader
     if (this.state.initialFetch === true && !this.state.fadeLoader) {
       this.fadeOutLoader()
     }
 
+    // sets the CSS classes to the loader that make it fade and then "display: none;"
     if (this.state.fadeLoader) {
       loaderClass = "fadeoutLoader"
       loaderDivClass = " fadeoutLoaderDiv"
@@ -454,15 +461,18 @@ class Canvas extends Component {
               <h1> Whiteboard </h1>
             </div>
 
+            {/* We only display the loader if the loaderFaded state is not true - if it is, then nothing displays */}
             {!this.state.loaderFaded &&
               <div className={loaderDivClass} style={{position: 'absolute', zIndex: '5', top: '0', left: '0', width: '100%', height: '100%', backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
                 <img className={loaderClass} style={{width: '100px', height: '100px', background: 'transparent', filter: 'hue-rotate(110deg) brightness(0.62) contrast(400%)'}} src="Cells-256px.gif" alt="loading bar"/>
               </div>
             }
 
+            {/* The tool menu */}
             <div id="controls">
               <Controls path={this.props.path} triggerIntro={this.fadeInIntro}/>
             </div>
+
             <div
               id="canvas"
               onClick={this.handleClick}
@@ -471,6 +481,8 @@ class Canvas extends Component {
               tabIndex="0"
             >
 
+              {/* If introFaded state is false, do this - otherwise, completely destroy component from Render function
+              (as opposed to only rendering with CSS "display: none;") */}
               {!this.state.introFaded &&
                 <div id="canvas-placeholder" className={placeholderClass}>
 
@@ -478,11 +490,13 @@ class Canvas extends Component {
                 </div>
               }
 
+              {/* The sketching area - always there, but only drawable when pointer events have been added via CSS class */}
               <div className={sketchFieldClass}>
                 {SketchFieldHolder}
               </div>
+
+            {/* For every item in the editorComponents state, we map onto an instance of <Editor/>, which houses the Froala WYSIWYG editor */}
               {Object.keys(this.state.editorComponents).map( editor => {
-                // console.log(editor)
                 return <Editor id={editor}
                                x={this.state.editorComponents[editor].x}
                                y={this.state.editorComponents[editor].y}
@@ -497,6 +511,8 @@ class Canvas extends Component {
         )
   }
 }
+
+// Redux props
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators( {

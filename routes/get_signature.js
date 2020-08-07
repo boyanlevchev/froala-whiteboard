@@ -3,6 +3,12 @@ var router = express.Router();
 var cors = require('cors');
 require('dotenv').config();
 
+var moment = require('moment');
+var crypto = require('crypto');
+
+
+// setting cors below - which websites can access this route
+
 var allowedOrigins = [
     'http://localhost:3000',
     'http://froala-whiteboard.herokuapp.com/',
@@ -36,18 +42,17 @@ var corsOptions = {
 
 router.all('*', cors(corsOptions))
 
-var FroalaEditor = require('wysiwyg-editor-node-sdk');
 
-var moment = require('moment');
-var crypto = require('crypto');
-
+// a get request to the get_signature, with the whiteboard ID appended as a param
+// generates an AWS signature, which allows us to store uploaded images and videos into AWS.
+// Uses the whiteboard ID param to generate a new folder for the images and videos to upload into
 
 router.get('/:s3folder', function (req, res, next) {
   s3folder = req.params.s3folder
   var s3Config = {
       bucket: process.env.AWS_S3_BUCKET,
-      // region: 's3-eu-west-2',
-      region: 's3-us-east-1',
+      region: 's3-eu-west-2',
+      // region: 's3-us-east-1', // used for testing purposes
       keyStart: s3folder + '/',
       acl: 'public-read-write',
       accessKeyId: process.env.AWS_ACCESS_KEY

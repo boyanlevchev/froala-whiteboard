@@ -33,13 +33,6 @@ import 'froala-editor/css/plugins/colors.min.css';
 import 'froala-editor/css/plugins/emoticons.min.css';
 import 'froala-editor/css/plugins/file.min.css';
 
-//Don't need this - will remove
-// import { froalaBanner } from '../javascript/on_load';
-
-// Require Font Awesome.
-// import 'font-awesome/css/font-awesome.css';
-
-// const Codox = window.Codox
 
 class Editor extends Component {
 
@@ -51,12 +44,13 @@ class Editor extends Component {
 
     this.state = {
       model: this.props.html,
-      // lastContentId: 0,
       styling: "",
       secondClick: {}
     };
   }
 
+  // This toolbar config exists to overcome a glitch with the editor, where the toolbar would not stay open if there is no text
+  // So this config shows a reduced toolbar, which doesn't have text options - only image, video, and file upload options
   toolbarButtonsLess = {
     'moreRich': {
       'buttons': ['insertImage', 'insertVideo', 'insertLink', 'insertFile', 'emoticons'],
@@ -67,6 +61,7 @@ class Editor extends Component {
     }
   }
 
+  // And then, if text gets added to the editor - the editor is destroeyd and recreated with a new toolbar with the following config
   toolbarButtonsMore = {
     'moreRich': {
         'buttons': ['insertImage', 'insertVideo', 'insertLink', 'insertFile', 'emoticons'],
@@ -85,6 +80,8 @@ class Editor extends Component {
     }
   }
 
+  // Updates an editor with data retrieved from Firebase, which gets passed through as a prop from canvas.jsx
+  // Doesn't update your own editor if you are the one adding info to the editor, by comparing it to the local editor, before adding data
   componentDidUpdate(prevProps, prevState){
     if ((prevProps.html !== this.props.html) && (this.state.model !== this.props.html)){
       this.setState({
@@ -96,6 +93,7 @@ class Editor extends Component {
     }
   }
 
+  // Send into Redux prop the ID of the currently selected editor - which can then be used to drag the editor from canvas.jsx
   handleClick = (e) => {
     this.props.selectEditor(this.props.id)
     if (this.props.canvasDraggable){
@@ -103,12 +101,15 @@ class Editor extends Component {
     }
   }
 
+  // As above, but also calculates the distance from mouse click to the end of the editor as x and y offset, and passes it through Redux to canvas.jsx (given its just a parent - yes, perhaps redux wasn't necessary)
   handleMouseDown = (event) => {
-    console.log(event.target)
+
     this.props.selectEditor(this.props.id)
+
+    // Only if the canvas is draggable i.e. drag button is clicked or Command button (On Mac - Windows might be Control) is held
     if (this.props.canvasDraggable || this.props.dragnDropButtonActive) {
       event.preventDefault()
-      console.log("canvas draggable", this.props.canvasDraggable)
+
       const yOffset = (event.clientY-this.props.y)
       const xOffset = (event.clientX-this.props.x)
       if (xOffset && yOffset){
@@ -117,11 +118,13 @@ class Editor extends Component {
     }
   }
 
+  // Used to reinitialize the editor after we destroy it - for when we have to switch between toolbar configs
   handleManualController = function(initControls) {
     initControls.initialize()
     this.initControls = initControls;
   }
 
+  // When content in the editor changes, this is called
   handleModelChange = function(model) {
     const htmlPath = `${this.props.canvasPath}/editors/${this.props.id}/html`
     const x = this.props.x
@@ -129,9 +132,12 @@ class Editor extends Component {
 
     console.log("model changed")
 
+    // If model wasn't empty, but now it is - or vice versa - then destroy and reinitialize the editor with new corresponding toolbar
+    // We do this, because there is a particular issue with Froala editor, that doesn't allow it to open the toolbar if there is no text input,
+    // And there are multiple editor instances at the same time.
     if ((this.state.model === "" && model !== "") || (this.state.model !== "" && model === "")) {
       if (this.initControls) {
-        console.log("triggered")
+
         this.initControls.destroy();
         this.setState({
           model: model
@@ -139,6 +145,7 @@ class Editor extends Component {
         this.initControls.initialize()
         const editor = this.initControls.getEditor()
 
+        // This allows us to re-focus on the editor after it is reinitialized
         setTimeout(function(){
           editor.events.focus();
           editor.selection.setAtEnd(editor.$el.get(0));
@@ -152,10 +159,14 @@ class Editor extends Component {
       })
     }
 
+    // Send all updates to the model up to parent, and to Firebase
     this.props.updateEditorLocally({[this.props.id]: {html: model, x:x, y:y}})
     this.props.updateEditor({[htmlPath]: model})
   }
 
+  // The ComponentDidUpdate function leads here
+  // Updates the model of the editor with information pulled from Firebase and passed down as a normal prop from the parent
+  // Ensures that the toolbar is updated correctly when another user inputs something
   handleToolbarUpdateViaProps = function(prevProps) {
     if ((prevProps.html === "" && this.props.html !== "") || (prevProps.html !== "" && this.props.html === "")) {
       if (this.initControls) {
@@ -175,17 +186,27 @@ class Editor extends Component {
   }
 
   render() {
+    // we save the component this into a variable so we can reference in scoped functions later on
     var self = this;
     let editorClass = "editor"
 
+    // We set inner content of the editor we are dragging to be unclickable
+    // There was a minor glitch where, dragging the editor might sometimes result
+    // In dragging items inside of the editor - an unwanted side effect
+    // So we turn off the ability to click inside while we drag
     if (this.props.canvasDraggable || this.props.canvasDrawable || this.props.dragnDropButtonActive) {
       editorClass = editorClass + " inner-content-unclickable"
     }
 
+    // Sets a nice little border so you visually see which editor is currently selected.
     if (this.props.selectedEditor === this.props.id) {
       editorClass = editorClass + " selected-editor"
     }
 
+    // We create the style here for the <div> holding the froala editor, so that we can dynamically update its position
+    // When we drag the editor from the parent - inputting new coordinates into 'top' and 'left'
+    // Could be good to change this to 'transfrom: translate()' - as apparently that is graphically more stream-lined
+    // but maybe comes with its own pitfalls
     let style = {
       position: 'absolute',
       top: `${this.props.y}px`,
@@ -194,6 +215,7 @@ class Editor extends Component {
       zIndex: '0'
     }
 
+    // Here we define a custom Froala editor delete button icon to be placed in the toolbar
     Froalaeditor.DefineIcon('deleteItem', { NAME: 'deleteItem', SVG_KEY: 'remove' })
     Froalaeditor.RegisterCommand('deleteItem', {
       title: 'Delete this item',
@@ -201,12 +223,15 @@ class Editor extends Component {
       undo: true,
       refreshAfterCallback: false,
       callback: function() {
+        // When clicked, we delete the editor from Firebase, and make sure the toolbar goes away with it -
+        // as sometimes the toolbar would remain on screen.
         const htmlPath = `${self.props.canvasPath}/editors/${this.itemId}`
         this.toolbar.hide()
         self.props.deleteEditor(htmlPath);
       }
     })
 
+    // This is the config for the Froala editor
     const config = {
       events: {
         'initialized': function() {
@@ -217,12 +242,6 @@ class Editor extends Component {
           self.props.setDragging(null);
         },
         'mousedown': function(e) {
-          // console.log("clicked")
-          if (self.props.canvasDraggable) {
-            console.log("clicked while draggable")
-            e.preventDefault();
-            return false;
-          }
           self.handleMouseDown(e);
         },
         'keydown': function(e){
@@ -232,7 +251,6 @@ class Editor extends Component {
         },
         'keyup': function(e) {
           if ( e.keyCode === 91 || e.keyCode === 93 ){
-            // this.$el[0].style.pointerEvents = 'auto'
             self.props.setCanvasDraggable(false);
           }
         }
@@ -269,6 +287,7 @@ class Editor extends Component {
   }
 }
 
+// Redux props
 function mapDispatchToProps(dispatch) {
   return bindActionCreators( {
     selectEditor: selectEditor,

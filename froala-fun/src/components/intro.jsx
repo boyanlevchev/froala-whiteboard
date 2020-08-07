@@ -9,6 +9,7 @@ class Intro extends Component {
   constructor(props) {
     super(props);
 
+    // refernce each HTML video object, so that we can run play on them
     this.video1 = React.createRef()
     this.video2 = React.createRef()
     this.video3 = React.createRef()
@@ -17,6 +18,7 @@ class Intro extends Component {
     this.video6 = React.createRef()
     this.video7 = React.createRef()
 
+    // create an array of all the video refs, so we can easily target them programatically later
     this.videos = [
       this.video1,
       this.video2,
@@ -32,6 +34,7 @@ class Intro extends Component {
     };
   }
 
+  // if the next button is clicked, we increment the state index, and then play the corresponding video
   nextClicked = () => {
     this.setState({
       index: this.state.index + 1
@@ -40,6 +43,7 @@ class Intro extends Component {
     })
   }
 
+  // same as above - de-increment index, and play respective video
   previousClicked = () => {
     this.setState({
       index: this.state.index - 1
@@ -47,6 +51,11 @@ class Intro extends Component {
       if (this.state.index > 0) this.videos[this.state.index-1].current.play()
     })
   }
+
+  // Custom built "bootstrap carousel"
+  // Instead of using display: none, we only render a page from the intro if it is the active one
+  // every other page simply does not get rendered - as opposed to rendering all pages, but keeping
+  // all inactive pages with display: none
 
   render() {
     const index = this.state.index

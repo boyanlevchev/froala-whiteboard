@@ -3,6 +3,8 @@ var router = express.Router();
 var cors = require('cors');
 require('dotenv').config();
 
+// setting cors below - which websites can access this route
+
 var allowedOrigins = [
     'http://localhost:3000',
     'http://froala-whiteboard.herokuapp.com/',
@@ -36,7 +38,7 @@ var corsOptions = {
 
 router.all('*', cors(corsOptions))
 
-/* GET users listing. */
+// a get request to this route returns the key necessary for using the Froala editor
 router.get('/', function(req, res, next) {
   res.send(process.env.FROALA_KEY)
   // res.send('respond with a resource');

@@ -1,3 +1,0 @@
-DirectoryIndex disabled
-RewriteEngine On
-  RewriteRule ^(index\.html\.var)?$ http://162.241.91.148:3000 [P,L]

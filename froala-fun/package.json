@@ -9,7 +9,7 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
-    "aws-sdk": "^2.686.0",
+    "aws-sdk": "^2.814.0",
     "bootstrap": "^4.5.0",
     "dotenv": "^8.2.0",
     "firebase": "^7.14.4",
